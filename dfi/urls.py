@@ -14,7 +14,7 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from django.conf import settings
 
 if settings.APP_ENV == 'dev':
@@ -23,6 +23,7 @@ if settings.APP_ENV == 'dev':
     
     urlpatterns = [
         path('admin/', admin.site.urls),
+        path('api/v1/users/', include('users.urls')),
         
         re_path(
             r'^api/v1/schema(?P<format>\.json|\.yaml)$', 
@@ -41,4 +42,5 @@ if settings.APP_ENV == 'dev':
 else:
     urlpatterns = [
         path('admin/', admin.site.urls),
+        path('api/v1/users/', include('users.urls')),
     ]
