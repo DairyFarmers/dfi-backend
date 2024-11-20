@@ -203,11 +203,11 @@ SIMPLE_JWT = {
 }
 
 
-# Swagger Configurations
-
-SWAGGER_SETTINGS = {
-    'USE_SESSION_AUTH': False,
-}
+## Swagger Configurations
+#
+#SWAGGER_SETTINGS = {
+#    'USE_SESSION_AUTH': False,
+#}
 
 
 # CORS Configurations
