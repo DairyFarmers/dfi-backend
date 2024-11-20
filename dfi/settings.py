@@ -13,11 +13,13 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 from pathlib import Path
 import environ
 import os
+from datetime import timedelta
 
 env = environ.Env(
     APP_ENV=(str, 'dev'),
     DEBUG=(bool, False),
     ALLOWED_HOSTS=(list, []),
+    SECURE_COOKIE=(bool, False),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -52,6 +54,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework_simplejwt.token_blacklist',
     'drf_yasg',
     'users',
 ]
@@ -154,11 +157,43 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'users.User'
 
+ACCESS_KEY = env('ACCESS_KEY')
+SECURE_COOKIE = env('SECURE_COOKIE')
+ACCESS_TOKEN_LIFETIME = timedelta(minutes=env.int('JWT_ACCESS_TOKEN_EXPIRATION_DELTA'))
+REFRESH_TOKEN_LIFETIME = timedelta(days=env.int('JWT_REFRESH_TOKEN_EXPIRATION_DELTA'))
+AUTH_COOKIE_SAMESITE = env('AUTH_COOKIE_SAMESITE')
+
+REST_FRAMEWORK = {
+    'NON_FIELD_ERRORS_KEY':'error',
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'custom.jwt_authentication.CustomJWTAuthentication',
+    )
+}
+
+SIMPLE_JWT = {
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': ACCESS_KEY,
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'AUDIENCE': None,
+    'ISSUER': None,
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+    'VERIFYING_KEY': None,
+    'ACCESS_TOKEN_LIFETIME': ACCESS_TOKEN_LIFETIME,
+    'REFRESH_TOKEN_LIFETIME': REFRESH_TOKEN_LIFETIME,
+    'REFRESH_TOKEN_COOKIE': 'refreshToken',
+    'AUTH_COOKIE': 'accessToken',
+    'AUTH_COOKIE_SECURE': SECURE_COOKIE,
+    'AUTH_COOKIE_HTTP_ONLY': True,
+    'AUTH_COOKIE_SAMESITE': AUTH_COOKIE_SAMESITE,
+    'AUTH_COOKIE_PATH': '/',
+    'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
+}
+
 
 # Swagger Configurations
 
 SWAGGER_SETTINGS = {
     'USE_SESSION_AUTH': False,
-    'LOGIN_URL': 'rest_framework:login',
-    'LOGOUT_URL': 'rest_framework:logout',
 }

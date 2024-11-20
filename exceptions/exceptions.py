@@ -6,3 +6,11 @@ class RepositoryException(Exception):
 
 class DatabaseException(RepositoryException):
     pass
+
+class InvalidDataException(ServiceException):
+    pass
+
+class InvalidCredentialsException(ServiceException):
+    pass
+
+
