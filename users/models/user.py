@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin
 from django.utils.translation import gettext_lazy as _
 from users.managers.user import UserManager
 import uuid
+from rest_framework_simplejwt.tokens import RefreshToken
 
 AUTH_PROVIDERS = {'email': 'email'}
 
@@ -31,4 +32,11 @@ class User(AbstractBaseUser, PermissionsMixin):
     @property
     def get_full_name(self):
         return f'{self.first_name} {self.last_name}'
+    
+    def tokens(self):
+        refresh_token = RefreshToken.for_user(self)
+        return {
+            'refresh_token': str(refresh_token),
+            'access_token': str(refresh_token.access_token)
+        }
     
