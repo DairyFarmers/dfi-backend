@@ -33,6 +33,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 BASE_DIR_TEMP = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DIR_TEMPLATES = os.path.join(BASE_DIR_TEMP, "templates")
 DIR_STATIC = os.path.join(BASE_DIR_TEMP, "static")
+DIR_STATIC_ROOT = os.path.join(BASE_DIR_TEMP, "staticfiles")
 
 environ.Env.read_env(os.path.join(BASE_DIR_TEMP, '.env'))
 
@@ -154,6 +155,8 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     DIR_STATIC,
 ]
+
+STATIC_ROOT = DIR_STATIC_ROOT
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field
