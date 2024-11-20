@@ -20,6 +20,12 @@ env = environ.Env(
     DEBUG=(bool, False),
     ALLOWED_HOSTS=(list, []),
     SECURE_COOKIE=(bool, False),
+    CORS_ALLOW_ALL_ORIGINS=(bool, False),
+    CORS_ALLOWED_ORIGINS=(list, []),
+    CORS_ALLOW_CREDENTIALS=(bool, False),
+    CORS_ALLOW_METHODS=(list, []),
+    CORS_EXPOSE_HEADERS=(list, []),
+    CORS_ALLOW_HEADERS=(list, []),
 )
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -204,7 +210,7 @@ SWAGGER_SETTINGS = {
 # CORS Configurations
 
 CORS_ALLOW_ALL_ORIGINS = env('CORS_ALLOW_ALL_ORIGINS')
-CORS_ALLOWED_ORIGINS = env('CORS_ALLOWED_ORIGINS')
+#CORS_ALLOWED_ORIGINS = env('CORS_ALLOWED_ORIGINS')
 CORS_ALLOW_CREDENTIALS = env('CORS_ALLOW_CREDENTIALS')
 CORS_ALLOW_METHODS = env('CORS_ALLOW_METHODS')
 CORS_EXPOSE_HEADERS = env('CORS_EXPOSE_HEADERS')
