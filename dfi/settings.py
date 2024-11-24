@@ -19,6 +19,7 @@ env = environ.Env(
     APP_ENV=(str, 'dev'),
     DEBUG=(bool, False),
     ALLOWED_HOSTS=(list, []),
+    TRUSTED_ORIGIN=(list, []),
     SECURE_COOKIE=(bool, False),
     CORS_ALLOW_ALL_ORIGINS=(bool, False),
     CORS_ALLOWED_ORIGINS=(list, []),
@@ -49,6 +50,8 @@ SECRET_KEY = env('SECRET_KEY')
 DEBUG = env('DEBUG')
 
 ALLOWED_HOSTS = env('ALLOWED_HOSTS')
+
+TRUSTED_ORIGIN = env('TRUSTED_ORIGIN')
 
 
 # Application definition
@@ -218,3 +221,13 @@ CORS_ALLOW_CREDENTIALS = env('CORS_ALLOW_CREDENTIALS')
 CORS_ALLOW_METHODS = env('CORS_ALLOW_METHODS')
 CORS_EXPOSE_HEADERS = env('CORS_EXPOSE_HEADERS')
 CORS_ALLOW_HEADERS = env('CORS_ALLOW_HEADERS')
+
+# Mail Server Configurations
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = env('EMAIL_HOST')
+EMAIL_PORT = env('EMAIL_PORT')
+EMAIL_USE_TLS = env('EMAIL_USE_TLS')
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
