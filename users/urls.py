@@ -7,6 +7,8 @@ from users.views.login_view import LoginView
 from users.views.token_verification_view import TokenVerificationView
 from users.views.email_verification_view import EmailVerificationView
 from users.views.passcode_view import PasscodeView
+from users.views.password_reset_request_view import PasswordResetRequestView
+from users.views.password_reset_view import PasswordResetView
 
 urlpatterns = [
     path('signup', SignupView.as_view(), name='signup'),
@@ -14,4 +16,6 @@ urlpatterns = [
     path('token/verification', TokenVerificationView.as_view(), name='token_verification'),
     path('verification', EmailVerificationView.as_view(), name='verification'),
     path('otp', PasscodeView.as_view(), name='passcode'),
+    path('password-reset-request', PasswordResetRequestView.as_view(), name='password_reset_request'),
+    path('password-reset', PasswordResetView.as_view(), name='password_reset'),
 ]
