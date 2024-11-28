@@ -18,6 +18,12 @@ class UserService:
             return self.repository.get(id=user_id)
         except RepositoryException as e:
             raise ServiceException('User not found')
+        
+    def get_user_by_email(self, email):
+        try:
+            return self.repository.get_by_email(email=email)
+        except RepositoryException as e:
+            raise ServiceException('User not found')
     
     def is_email_verified(self, user_id):
         try:
