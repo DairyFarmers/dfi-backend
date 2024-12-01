@@ -11,6 +11,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 class SignupView(APIView):
     serializer = SignupSerializer
     user_repository = UserRepository(User)
@@ -20,8 +21,9 @@ class SignupView(APIView):
         request_body=serializer,
         responses={201: 'User account was created', 400: 'Invalid data'}
     )
-    
+
     def post(self, request):
+
         serializer = self.serializer(data=request.data)
         if not serializer.is_valid():
             return Response({
