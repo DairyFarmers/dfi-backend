@@ -32,6 +32,7 @@ class EmailVerificationView(APIView):
         request_body=serializer,
         responses={200: 'Email is verified', 400: 'Invalid Data'}
     )
+
     
     def post(self, request):
         serializer = self.serializer(data=request.data)
