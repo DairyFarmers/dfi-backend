@@ -16,7 +16,7 @@ class PasswordResetRequestViewTest(APITestCase):
             password="password123",
             first_name="Test",
             last_name="User",
-            is_verified=True,
+            is_verified=True
         )
         # API URL for the password reset request view
         self.url = reverse("password_reset_request")
