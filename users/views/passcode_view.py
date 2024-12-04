@@ -9,6 +9,7 @@ from users.repositories.passcode_repository import PasscodeRepository
 from users.models import Passcode
 from utilities.email_sender import EmailSender
 
+
 class PasscodeView(APIView):
     permission_classes = (IsAuthenticated,)
     passcode_repository = PasscodeRepository(Passcode)

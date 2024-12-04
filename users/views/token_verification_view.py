@@ -4,10 +4,12 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from django.conf import settings
 
+
 class TokenVerificationView(APIView):
     permission_classes = (IsAuthenticated,)
     
     def get(self, request):
+
         user = request.user
         response = Response({
             'message': 'User authenticated successfully',
