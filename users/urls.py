@@ -2,7 +2,7 @@
 
 from django.contrib import admin
 from django.urls import path
-from users.views.signup_view import SignupView
+from users.views.registration_view import RegistrationView
 from users.views.login_view import LoginView
 from users.views.token_verification_view import TokenVerificationView
 from users.views.email_verification_view import EmailVerificationView
@@ -11,7 +11,7 @@ from users.views.password_reset_request_view import PasswordResetRequestView
 from users.views.password_reset_view import PasswordResetView
 
 urlpatterns = [
-    path('signup', SignupView.as_view(), name='signup'),
+    path('registration', RegistrationView.as_view(), name='registration'),
     path('login', LoginView.as_view(), name='login'),
     path('token/verification', TokenVerificationView.as_view(), name='token_verification'),
     path('verification', EmailVerificationView.as_view(), name='verification'),

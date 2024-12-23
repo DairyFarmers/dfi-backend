@@ -9,7 +9,8 @@ class UserManager(BaseUserManager):
         email, 
         first_name, 
         last_name, 
-        password=None, 
+        password=None,
+        role=2,
         **extra_fields
         ):
         if email:
@@ -24,10 +25,14 @@ class UserManager(BaseUserManager):
         if not last_name:
             raise ValueError(_('The last name field must be set'))
         
+        if not role:
+            raise ValueError(_('The role field must be set'))
+        
         user = self.model(
             email=email, 
             first_name=first_name, 
-            last_name=last_name, 
+            last_name=last_name,
+            role=role, 
             **extra_fields
         )
         user.set_password(password)
