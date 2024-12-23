@@ -22,6 +22,7 @@ class LoginService:
             'id': user.id,
             'full_name': user.get_full_name,
             'is_verified': user.is_verified,
+            'role': user.role,
             'access_token': str(tokens['access_token']),
             'refresh_token': str(tokens['refresh_token'])
         }

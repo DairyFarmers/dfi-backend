@@ -44,6 +44,7 @@ class LoginView(APIView):
                     'id': user_data['id'],
                     'full_name': user_data['full_name'],
                     'is_verified': user_data['is_verified'],
+                    'role': user_data['role'],
                 }
             }, status=status.HTTP_200_OK)
             response.set_cookie(
