@@ -32,7 +32,7 @@ class InventoryDetailView(APIView):
     def put(self, request, item_id):
         serializer = self.serializer(data=request.data)
         if serializer.is_valid():
-            item = self.service.update_item(item_id, serializer.validated_data)
+            item = self.service.update_item(item_id, **serializer.validated_data)
             if item:
                 return Response({"message": "Item updated"}, status=status.HTTP_200_OK)
             return Response({"error": "Item not found"}, status=status.HTTP_404_NOT_FOUND)
