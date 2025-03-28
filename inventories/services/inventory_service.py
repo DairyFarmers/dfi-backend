@@ -30,3 +30,9 @@ class InventoryService:
             return self.repository.update(item_id, **kwargs)
         except RepositoryException as e:
             raise ServiceException('Error while updating item')
+        
+    def delete_item(self, item_id):
+        try:
+            return self.repository.delete(item_id)
+        except RepositoryException as e:
+            raise ServiceException('Error while deleting item')

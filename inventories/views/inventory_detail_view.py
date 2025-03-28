@@ -12,14 +12,6 @@ class InventoryDetailView(APIView):
     repository = InventoryRepository(InventoryItem)
     service = InventoryService(repository)
 
-    @swagger_auto_schema(request_body=InventoryUpdateSerializer, responses={201: "Item created"})
-    def post(self, request):
-        serializer = self.serializer(data=request.data)
-        if serializer.is_valid():
-            item = self.service.add_item(serializer.validated_data)
-            return Response({"id": item.id}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
     @swagger_auto_schema(responses={200: InventoryUpdateSerializer()})
     def get(self, request, item_id):
         item = self.service.get_item_by_id(item_id)
@@ -39,7 +31,7 @@ class InventoryDetailView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, item_id):
-        deleted = self.service.delete_item(item_id)
-        if deleted:
+        item = self.service.delete_item(item_id)
+        if item:
             return Response({"message": "Item deleted"}, status=status.HTTP_200_OK)
         return Response({"error": "Item not found"}, status=status.HTTP_404_NOT_FOUND)
