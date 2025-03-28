@@ -24,6 +24,9 @@ if settings.APP_ENV == 'dev':
     urlpatterns = [
         path('admin/', admin.site.urls),
         path('api/v1/users/', include('users.urls')),
+        path('api/v1/dashboard/', include('dashboard.urls')),
+        path('api/v1/inventory/', include('inventories.urls')),
+        path('api/v1/orders/', include('orders.urls')),
         
         re_path(
             r'^api/v1/schema(?P<format>\.json|\.yaml)$', 
@@ -43,4 +46,7 @@ else:
     urlpatterns = [
         path('admin/', admin.site.urls),
         path('api/v1/users/', include('users.urls')),
+        path('api/v1/dashboard/', include('dashboard.urls')),
+        path('api/v1/inventory/', include('inventories.urls')),
+        path('api/v1/orders/', include('orders.urls')),
     ]
