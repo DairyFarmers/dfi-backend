@@ -1,6 +1,7 @@
 from django.db import models
 from repositories.interfaces.base_repository_interface \
     import BaseRepositoryInterface
+from django.db import models, DatabaseError
 from exceptions.exceptions import DatabaseException
 
 class BaseRepository(BaseRepositoryInterface):

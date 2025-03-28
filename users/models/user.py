@@ -8,6 +8,12 @@ from rest_framework_simplejwt.tokens import RefreshToken
 AUTH_PROVIDERS = {'email': 'email'}
 
 class User(AbstractBaseUser, PermissionsMixin):
+    ROLE_CHOICES = [
+        "admin",
+        "inventory_manager",
+        "shop_owner",
+        "farmer",
+    ]
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(
         max_length=255, verbose_name=_("Email Address"), unique=True
@@ -20,7 +26,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     date_joined = models.DateTimeField(auto_now_add=True)
     last_login = models.DateTimeField(auto_now=True)
     is_verified = models.BooleanField(default=False)
-    role = models.IntegerField(default=2)
+    role = models.CharField(max_length=50, choices=[(r, r) for r in ROLE_CHOICES], default="farmer")
     
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["first_name", "last_name", "role"]

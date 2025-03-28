@@ -27,17 +27,7 @@ class RegistrationSerializer(serializers.ModelSerializer):
                 and 1 special character'''
             )
             
-        if not self.check_role(role):
-            raise serializers.ValidationError(
-                'Invalid input for role'
-            )
         return data
-    
-    def check_role(self, role):
-        if role == 0: return False
-        if role == 1: return True
-        if role == 2: return True
-        return False
         
     def is_strong_password(self, password):
         if len(password) < 8:

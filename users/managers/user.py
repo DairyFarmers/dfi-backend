@@ -10,7 +10,7 @@ class UserManager(BaseUserManager):
         first_name, 
         last_name, 
         password=None,
-        role=2,
+        role="farmer",
         **extra_fields
         ):
         if email:
@@ -39,6 +39,18 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
+    def create_superuser(self, email, first_name, last_name, password):
+        user = self.create_user(
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
+            password=password,
+            role="admin",
+            is_staff=True,
+            is_superuser=True,
+        )
+        return user
+    
     def validate_email(self, email):
         try:
             validate_email(email)
