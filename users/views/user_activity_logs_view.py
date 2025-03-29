@@ -9,6 +9,5 @@ class UserActivityLogsView(APIView):
     @swagger_auto_schema(responses={200: UserActivityLogsSerializer(many=True)})
     def get(self, request):
         logs = UserActivityLog.objects.all().order_by("-timestamp")[:100]
-        print(logs)
         serializer = UserActivityLogsSerializer(logs, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
