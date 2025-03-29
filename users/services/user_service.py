@@ -39,3 +39,9 @@ class UserService:
             return self.repository.update(user_id, **kwargs)
         except RepositoryException as e:
             raise ServiceException('User update failed')
+        
+    def get_all_users(self):
+        try:
+            return self.repository.get_all()
+        except RepositoryException as e:
+            raise ServiceException('Failed to retrieve users')
