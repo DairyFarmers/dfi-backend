@@ -3,7 +3,7 @@
 *.log
 *_initial.py
 test2
-
+staticfiles
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
