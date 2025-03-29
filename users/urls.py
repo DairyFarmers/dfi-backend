@@ -11,6 +11,7 @@ from users.views.password_reset_request_view import PasswordResetRequestView
 from users.views.password_reset_view import PasswordResetView
 from users.views.user_list_view import UserListView
 from users.views.user_view import UserView
+from users.views.user_activity_logs_view import UserActivityLogsView
 
 urlpatterns = [
     path('registration', RegistrationView.as_view(), name='registration'),
@@ -22,4 +23,5 @@ urlpatterns = [
     path('password-reset', PasswordResetView.as_view(), name='password_reset'),
     path('list', UserListView.as_view(), name='user-list'),
     path('detail/<str:user_id>', UserView.as_view(), name='user-detail'),
+    path("activity-logs", UserActivityLogsView.as_view(), name="user-activity-logs"),
 ]
