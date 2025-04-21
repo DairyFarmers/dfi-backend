@@ -10,6 +10,9 @@ class DashboardService:
             "inventory_status": self.repository.get_inventory_status(),
             "user_statistics": self.repository.get_user_statistics(),
         }
+    
+    def get_user_statistics(self):
+        return self.repository.get_user_statistics()
 
     def get_stock_summary(self):
         return self.repository.get_stock_summary()

@@ -3,6 +3,7 @@ from datetime import timedelta, date
 from orders.models.order import Order
 from inventories.models.inventory_item import InventoryItem
 from users.models.user import User
+from users.models.user_activity_log import UserActivityLog
 
 class DashboardRepository:
     def get_total_orders():
