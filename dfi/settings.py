@@ -70,6 +70,8 @@ INSTALLED_APPS = [
     'users',
     'inventories',
     'orders',
+    'dashboard',
+    'reports',
 ]
 
 MIDDLEWARE = [
@@ -81,6 +83,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'middlewares.user_activity_middleware.UserActivityMiddleware',
 ]
 
 ROOT_URLCONF = 'dfi.urls'
