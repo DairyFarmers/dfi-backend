@@ -27,6 +27,7 @@ if settings.APP_ENV == 'dev':
         path('api/v1/dashboard/', include('dashboard.urls')),
         path('api/v1/inventory/', include('inventories.urls')),
         path('api/v1/orders/', include('orders.urls')),
+        path('api/v1/chats/', include('chats.urls')),
         
         re_path(
             r'^api/v1/schema(?P<format>\.json|\.yaml)$', 
@@ -49,4 +50,5 @@ else:
         path('api/v1/dashboard/', include('dashboard.urls')),
         path('api/v1/inventory/', include('inventories.urls')),
         path('api/v1/orders/', include('orders.urls')),
+        path('api/v1/chats/', include('chats.urls')),
     ]

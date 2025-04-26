@@ -57,6 +57,7 @@ TRUSTED_ORIGIN = env('TRUSTED_ORIGIN')
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -67,11 +68,13 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
     'drf_yasg',
+    'channels',
     'users',
     'inventories',
     'orders',
     'dashboard',
     'reports',
+    'chats',
 ]
 
 MIDDLEWARE = [
@@ -104,7 +107,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'dfi.wsgi.application'
+ASGI_APPLICATION = 'dfi.asgi.application'
 
 
 # Database
@@ -119,6 +122,14 @@ DATABASES = {
         "HOST": env('DB_HOST'),
         "PORT": env('DB_PORT'),
     }
+}
+
+# WebSocket Configuration
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels.layers.InMemoryChannelLayer',
+    },
 }
 
 

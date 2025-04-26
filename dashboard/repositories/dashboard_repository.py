@@ -10,10 +10,10 @@ class DashboardRepository:
         return Order.objects.count()
 
     def get_total_revenue():
-        return Order.objects.aggregate(total_revenue=Sum("total_price"))["total_revenue"] or 0
+        return Order.objects.aggregate(total_revenue=Sum("total_amount"))["total_revenue"] or 0
 
     def get_pending_orders():
-        return Order.objects.filter(status="pending").count()
+        return Order.objects.filter(order_status="pending").count()
 
     def get_inventory_status():
         return InventoryItem.objects.aggregate(
@@ -39,8 +39,8 @@ class DashboardRepository:
     def get_orders_overview():
         return {
             "total_orders": Order.objects.count(),
-            "pending_orders": Order.objects.filter(status="pending").count(),
-            "completed_orders": Order.objects.filter(status="completed").count(),
+            "pending_orders": Order.objects.filter(order_status="pending").count(),
+            "completed_orders": Order.objects.filter(order_status="completed").count(),
         }
 
     def get_expiring_stock():
@@ -48,8 +48,8 @@ class DashboardRepository:
 
     def get_sales_graph_data():
         sales_data = (
-            Order.objects.extra({'order_date': "DATE(created_at)"})
+            Order.objects.extra({'order_date': "DATE(order_date)"})
             .values("order_date")
-            .annotate(total_sales=Sum("total_price"))
+            .annotate(total_sales=Sum("total_amount"))
         )
         return sales_data
