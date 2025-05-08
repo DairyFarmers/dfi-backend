@@ -4,6 +4,7 @@
 *_initial.py
 test2
 staticfiles
+tests
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -6,7 +6,6 @@ from django.conf import settings
 class PermissionMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
-        # Define permission requirements for specific URL patterns
         self.permission_map = {
             # User Management
             'user-list': ['can_view_users'],

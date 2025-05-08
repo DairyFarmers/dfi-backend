@@ -89,6 +89,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'middlewares.user_activity_middleware.UserActivityMiddleware',
+    'middlewares.permission_middleware.PermissionMiddleware',
 ]
 
 ROOT_URLCONF = 'dfi.urls'
