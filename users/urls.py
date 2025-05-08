@@ -12,6 +12,7 @@ from users.views.password_reset_view import PasswordResetView
 from users.views.user_list_view import UserListView
 from users.views.user_view import UserView
 from users.views.user_activity_logs_view import UserActivityLogsView
+from users.views.user_role_view import UserRoleView, UserRoleDetailView, InitializeDefaultRolesView
 
 urlpatterns = [
     path('registration', RegistrationView.as_view(), name='registration'),
@@ -24,4 +25,7 @@ urlpatterns = [
     path('list', UserListView.as_view(), name='user-list'),
     path('detail/<str:user_id>', UserView.as_view(), name='user-detail'),
     path("activity-logs/", UserActivityLogsView.as_view(), name="user-activity-logs"),
+    path('roles/', UserRoleView.as_view(), name='role-list'),
+    path('roles/<uuid:role_id>/', UserRoleDetailView.as_view(), name='role-detail'),
+    path('roles/initialize/', InitializeDefaultRolesView.as_view(), name='initialize-roles'),
 ]

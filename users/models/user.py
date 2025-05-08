@@ -4,16 +4,11 @@ from django.utils.translation import gettext_lazy as _
 from users.managers.user import UserManager
 import uuid
 from rest_framework_simplejwt.tokens import RefreshToken
+from users.models.user_role import UserRole
 
 AUTH_PROVIDERS = {'email': 'email'}
 
 class User(AbstractBaseUser, PermissionsMixin):
-    ROLE_CHOICES = [
-        "admin",
-        "inventory_manager",
-        "shop_owner",
-        "farmer",
-    ]
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     email = models.EmailField(
         max_length=255, verbose_name=_("Email Address"), unique=True
@@ -26,10 +21,10 @@ class User(AbstractBaseUser, PermissionsMixin):
     date_joined = models.DateTimeField(auto_now_add=True)
     last_login = models.DateTimeField(auto_now=True)
     is_verified = models.BooleanField(default=False)
-    role = models.CharField(max_length=50, choices=[(r, r) for r in ROLE_CHOICES], default="farmer")
+    role = models.ForeignKey(UserRole, on_delete=models.PROTECT, related_name='users')
     
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["first_name", "last_name", "role"]
+    REQUIRED_FIELDS = ["first_name", "last_name"]
 
     objects = UserManager()
     
@@ -46,4 +41,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             'refresh_token': str(refresh_token),
             'access_token': str(refresh_token.access_token)
         }
+    
+    def has_permission(self, permission_name):
+        return self.role.permissions.get(permission_name, False) if self.role else False
     
