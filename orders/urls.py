@@ -1,13 +1,14 @@
 # orders URL Configuration
 
-from django.contrib import admin
-from django.urls import path
-from orders.views.order_list_view import OrderListView
-from orders.views.order_detail_view import OrderDetailView
-from orders.views.order_add_view import OrderAddView
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views.order_views import OrderViewSet
+from .views.order_item_views import OrderItemViewSet
+
+router = DefaultRouter()
+router.register(r'orders', OrderViewSet, basename='order')
+router.register(r'order-items', OrderItemViewSet, basename='order-item')
 
 urlpatterns = [
-    path("list", OrderListView.as_view(), name="order-list"),
-    path("item/<int:order_id>", OrderDetailView.as_view(), name="order-detail"),
-    path("add", OrderAddView.as_view(), name="order-add"),
+    path('', include(router.urls)),
 ]
