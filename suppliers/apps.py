@@ -1,0 +1,11 @@
+from django.apps import AppConfig
+
+
+class SuppliersConfig(AppConfig):
+    default_auto_field = 'django.db.models.BigAutoField'
+    name = 'suppliers'
+    verbose_name = 'Suppliers Management'
+
+    def ready(self):
+        """Perform any app initialization here"""
+        pass
