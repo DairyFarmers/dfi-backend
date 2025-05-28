@@ -14,41 +14,38 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from .swagger import schema_view
 
-if settings.APP_ENV == 'dev':
-    from django.urls import re_path
-    from .swagger import schema_view
-    
-    urlpatterns = [
-        path('admin/', admin.site.urls),
-        path('api/v1/users/', include('users.urls')),
-        path('api/v1/dashboard/', include('dashboard.urls')),
-        path('api/v1/inventory/', include('inventories.urls')),
-        path('api/v1/orders/', include('orders.urls')),
-        path('api/v1/chats/', include('chats.urls')),
-        
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('api/v1/users/', include('users.urls')),
+    path('api/v1/dashboard/', include('dashboard.urls')),
+    path('api/v1/inventory/', include('inventories.urls')),
+    path('api/v1/orders/', include('orders.urls')),
+    path('api/v1/chats/', include('chats.urls')),
+    path('api/v1/suppliers/', include('suppliers.urls')),
+]
+
+if settings.DEBUG:
+    urlpatterns += [
         re_path(
-            r'^api/v1/schema(?P<format>\.json|\.yaml)$', 
+            r'^swagger(?P<format>\.json|\.yaml)$', 
             schema_view.without_ui(cache_timeout=0), 
             name='schema-json'
         ),
         path(
-            'api/v1/schema/', 
-            schema_view.with_ui(
-                'swagger', 
-                cache_timeout=0
-            ), 
+            'swagger/', 
+            schema_view.with_ui('swagger', cache_timeout=0), 
             name='schema-swagger-ui'
         ),
-    ]
-else:
-    urlpatterns = [
-        path('admin/', admin.site.urls),
-        path('api/v1/users/', include('users.urls')),
-        path('api/v1/dashboard/', include('dashboard.urls')),
-        path('api/v1/inventory/', include('inventories.urls')),
-        path('api/v1/orders/', include('orders.urls')),
-        path('api/v1/chats/', include('chats.urls')),
+        path(
+            'redoc/', 
+            schema_view.with_ui('redoc', cache_timeout=0), 
+            name='schema-redoc'
+        ),
     ]

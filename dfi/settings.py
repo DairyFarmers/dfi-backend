@@ -66,11 +66,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
+    'django_filters',
     'rest_framework_simplejwt.token_blacklist',
     'drf_yasg',
     'channels',
     'users',
     'inventories',
+    'suppliers',
     'orders',
     'dashboard',
     'reports',
@@ -194,10 +196,18 @@ REFRESH_TOKEN_LIFETIME = timedelta(days=env.int('JWT_REFRESH_TOKEN_EXPIRATION_DE
 AUTH_COOKIE_SAMESITE = env('AUTH_COOKIE_SAMESITE')
 
 REST_FRAMEWORK = {
-    'NON_FIELD_ERRORS_KEY':'error',
+    'NON_FIELD_ERRORS_KEY': 'error',
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'custom.jwt_authentication.CustomJWTAuthentication',
-    )
+    ),
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'
 }
 
 SIMPLE_JWT = {
@@ -222,11 +232,21 @@ SIMPLE_JWT = {
 }
 
 
-## Swagger Configurations
-#
-#SWAGGER_SETTINGS = {
-#    'USE_SESSION_AUTH': False,
-#}
+# Swagger Configurations
+
+SWAGGER_SETTINGS = {
+    'USE_SESSION_AUTH': False,
+    'SECURITY_DEFINITIONS': {
+        'Bearer': {
+            'type': 'apiKey',
+            'name': 'Authorization',
+            'in': 'header'
+        }
+    },
+    'SECURITY_REQUIREMENTS': [
+        {'Bearer': []}
+    ]
+}
 
 
 # CORS Configurations
