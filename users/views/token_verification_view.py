@@ -9,23 +9,35 @@ class TokenVerificationView(APIView):
     permission_classes = (IsAuthenticated,)
     
     def get(self, request):
-
         user = request.user
+        
+        # Get role data if it exists
+        role_data = None
+        if user.role:
+            role_data = {
+                'id': str(user.role.id),
+                'name': user.role.name,
+                'permissions': user.role.get_all_permissions()
+            }
+            
         response = Response({
             'message': 'User authenticated successfully',
             'status': True,
             'data': {
                 'email': user.email,
                 'id': user.id,
+                'full_name': user.get_full_name,
                 'is_verified': user.is_verified,
+                'role': role_data,
                 'status': True,
             }}, status=status.HTTP_200_OK)
+            
         response.set_cookie(
-                key=settings.SIMPLE_JWT['AUTH_COOKIE'], 
-                value=request.auth,
-                expires=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
-                secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
-                httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
-                samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
+            key=settings.SIMPLE_JWT['AUTH_COOKIE'], 
+            value=request.auth,
+            expires=settings.SIMPLE_JWT['ACCESS_TOKEN_LIFETIME'],
+            secure=settings.SIMPLE_JWT['AUTH_COOKIE_SECURE'],
+            httponly=settings.SIMPLE_JWT['AUTH_COOKIE_HTTP_ONLY'],
+            samesite=settings.SIMPLE_JWT['AUTH_COOKIE_SAMESITE']
         )
         return response

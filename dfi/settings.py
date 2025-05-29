@@ -255,9 +255,35 @@ SWAGGER_SETTINGS = {
 CORS_ALLOW_ALL_ORIGINS = env('CORS_ALLOW_ALL_ORIGINS')
 CORS_ALLOWED_ORIGINS = env('CORS_ALLOWED_ORIGINS')
 CORS_ALLOW_CREDENTIALS = env('CORS_ALLOW_CREDENTIALS')
-#CORS_ALLOW_METHODS = env('CORS_ALLOW_METHODS')
-#CORS_EXPOSE_HEADERS = env('CORS_EXPOSE_HEADERS')
-#CORS_ALLOW_HEADERS = env('CORS_ALLOW_HEADERS')
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+CORS_EXPOSE_HEADERS = [
+    'Authorization',
+    'Content-Type',
+    'X-Total-Count',
+    'X-Pagination-Count',
+    'X-Pagination-Page',
+    'X-Pagination-Limit',
+]
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+    'cache-control',
+    'pragma',
+]
 
 # Mail Server Configurations
 

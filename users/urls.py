@@ -13,6 +13,7 @@ from users.views.user_list_view import UserListView
 from users.views.user_view import UserView
 from users.views.user_activity_logs_view import UserActivityLogsView
 from users.views.user_role_view import UserRoleView, UserRoleDetailView, InitializeDefaultRolesView
+from users.utils.permissions import get_user_permissions, get_all_permissions
 
 urlpatterns = [
     path('registration', RegistrationView.as_view(), name='registration'),
@@ -28,4 +29,6 @@ urlpatterns = [
     path('roles/', UserRoleView.as_view(), name='role-list'),
     path('roles/<uuid:role_id>/', UserRoleDetailView.as_view(), name='role-detail'),
     path('roles/initialize/', InitializeDefaultRolesView.as_view(), name='initialize-roles'),
+    path('permissions/', get_user_permissions, name='user-permissions'),
+    path('permissions/all/', get_all_permissions, name='all-permissions'),
 ]

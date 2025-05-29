@@ -18,13 +18,16 @@ class DashboardService:
         return self.repository.get_total_users()
 
     def get_active_users(self):
-        return self.repository.get_active_users_count()
+        return self.repository.get_active_users()
 
     def get_total_revenue(self, time_range):
         return self.repository.get_total_revenue(time_range)
 
     def get_total_orders(self, time_range):
         return self.repository.get_total_orders(time_range)
+
+    def get_pending_orders(self):
+        return self.repository.get_pending_orders()
 
     def get_new_users_stats(self, time_range):
         return self.repository.get_new_users_stats(time_range)
@@ -45,7 +48,7 @@ class DashboardService:
         return self.repository.get_payment_methods_distribution()
 
     def get_system_health(self):
-        return self.repository.get_system_health_metrics()
+        return self.repository.get_system_health()
 
     def get_api_performance_metrics(self):
         return self.repository.get_api_performance_metrics()
@@ -97,7 +100,7 @@ class DashboardService:
     def get_shop_pending_orders(self, shop_owner_id):
         return self.repository.get_shop_pending_orders(shop_owner_id)
 
-    def get_order_status_distribution(self, shop_owner_id):
+    def get_order_status_distribution(self, shop_owner_id=None):
         return self.repository.get_order_status_distribution(shop_owner_id)
 
     def get_delivery_performance(self, shop_owner_id):
@@ -140,13 +143,21 @@ class DashboardService:
     def get_farmer_revenue_trends(self, farmer_id, time_range):
         return self.repository.get_farmer_revenue_trends(farmer_id, time_range)
 
-    def get_dashboard_summary(self):
+    def get_dashboard_summary(self, time_range='week'):
+        """Get complete dashboard summary"""
         return {
-            "total_orders": self.repository.get_total_orders(),
-            "total_revenue": self.repository.get_total_revenue(),
+            "total_orders": self.repository.get_total_orders(time_range),
+            "total_revenue": self.repository.get_total_revenue(time_range),
             "pending_orders": self.repository.get_pending_orders(),
-            "inventory_status": self.repository.get_inventory_status(),
-            "user_statistics": self.repository.get_user_statistics(),
+            "inventory_status": {
+                "total_items": self.repository.get_total_inventory_items(),
+                "low_stock_items": self.repository.get_low_stock_items(),
+                "stock_value": self.repository.get_total_stock_value()
+            },
+            "order_metrics": {
+                "status_distribution": self.repository.get_order_status_distribution(),
+                "recent_orders": self.repository.get_total_orders(time_range)
+            }
         }
     
     def get_user_statistics(self):
