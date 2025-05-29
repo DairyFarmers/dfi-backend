@@ -134,4 +134,10 @@ class DashboardSummaryView(APIView):
             **metrics
         }
 
-        return Response(data, status=status.HTTP_200_OK)
+        return Response({
+            "status": True,
+            "message": "Dashboard summary retrieved successfully.",
+            "data": data,
+            "timestamp": datetime.now().isoformat(),
+            "time_range": time_range
+        }, status=status.HTTP_200_OK)
