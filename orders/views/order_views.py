@@ -5,6 +5,7 @@ from rest_framework.permissions import IsAuthenticated
 from django.utils import timezone
 from django.db.models import Sum, Count
 from datetime import timedelta
+from django.db import transaction
 
 from orders.models import Order
 from orders.serializers import (
@@ -19,7 +20,7 @@ class OrderViewSet(viewsets.ModelViewSet):
     """
     ViewSet for managing orders.
     """
-    permission_classes = [IsAuthenticated]
+    #permission_classes = [IsAuthenticated]
     filterset_class = OrderFilter
     repository_class = OrderRepository
     
@@ -32,11 +33,25 @@ class OrderViewSet(viewsets.ModelViewSet):
         elif self.action in ['create', 'update', 'partial_update']:
             return OrderCreateUpdateSerializer
         return OrderDetailSerializer
-
-    def perform_create(self, serializer):
-        serializer.save()
-        order = serializer.instance
-        order.calculate_total()
+    
+    @transaction.atomic
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            try:
+                order = serializer.save()
+                order.calculate_total()  # Calculate totals after creating items
+                return Response(
+                    OrderDetailSerializer(order).data,
+                    status=status.HTTP_201_CREATED
+                )
+            except Exception as e:
+                return Response(
+                    {'error': str(e)},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        print("serializer errors:", serializer.errors)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def perform_update(self, serializer):
         serializer.save()
