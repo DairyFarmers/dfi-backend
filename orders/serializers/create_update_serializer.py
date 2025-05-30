@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from orders.models import Order, OrderItem
 from .base_serializer import OrderBaseSerializer, OrderItemBaseSerializer
+from django.db import transaction
 
 class OrderItemCreateUpdateSerializer(OrderItemBaseSerializer):
     """
@@ -9,8 +10,7 @@ class OrderItemCreateUpdateSerializer(OrderItemBaseSerializer):
     class Meta:
         model = OrderItem
         fields = [
-            'inventory_item', 'quantity', 'unit_price',
-            'discount', 'notes'
+            'inventory_item', 'quantity', 'unit_price', 'discount'
         ]
 
     def validate(self, data):
@@ -21,9 +21,14 @@ class OrderItemCreateUpdateSerializer(OrderItemBaseSerializer):
         quantity = data.get('quantity', 0)
         
         if inventory_item and quantity:
-            if quantity > inventory_item.current_stock:
+            if quantity > inventory_item.quantity:
                 raise serializers.ValidationError({
                     "quantity": f"Not enough stock. Available: {inventory_item.current_stock}"
+                })
+            
+            if quantity <= 0:
+                raise serializers.ValidationError({
+                    "quantity": "Quantity must be greater than zero"
                 })
         return data
 
@@ -41,20 +46,17 @@ class OrderCreateUpdateSerializer(OrderBaseSerializer):
             'shipping_address', 'billing_address', 'status',
             'priority', 'subtotal', 'tax', 'shipping_cost',
             'payment_status', 'payment_date', 'notes',
-            'internal_notes', 'tracking_number', 'items'
+            'internal_notes', 'tracking_number', 'items', 'total_amount'
         ]
 
+    @transaction.atomic
     def create(self, validated_data):
-        """
-        Create order with nested items.
-        """
-        items_data = validated_data.pop('items')
+        items_data = validated_data.pop('items', [])
         order = Order.objects.create(**validated_data)
         
         for item_data in items_data:
             OrderItem.objects.create(order=order, **item_data)
         
-        order.calculate_total()
         return order
 
     def update(self, instance, validated_data):

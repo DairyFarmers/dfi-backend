@@ -12,7 +12,6 @@ from suppliers.services import SupplierService
 from suppliers.views.filters import SupplierFilter
 
 class SupplierListView(APIView):
-    """View for listing and creating suppliers"""
     serializer_class = SupplierListSerializer
     service = SupplierService()
 

@@ -8,7 +8,7 @@ class SupplierListSerializer(SupplierBaseSerializer):
     class Meta:
         model = Supplier
         fields = [
-            'id', 'name', 'contact_person', 'email',
+            'id', 'name', 'contact_person', 'email', 'phone',
             'rating', 'is_active', 'created_at', 'updated_at'
         ]
         read_only_fields = ['created_at', 'updated_at', 'is_active'] 

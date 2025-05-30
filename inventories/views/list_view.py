@@ -13,7 +13,8 @@ from inventories.repositories.inventory_repository import InventoryRepository
 from inventories.views.filters.inventory_item_filter import InventoryItemFilter
 
 class InventoryItemView(APIView):
-    serializer_class = InventoryItemListSerializer
+    inventoryItemListSerializer = InventoryItemListSerializer
+    inventoryItemCreateUpdateSerializer = InventoryItemCreateUpdateSerializer
     repository = InventoryRepository(InventoryItem)
     service = InventoryService(repository)
 
@@ -27,8 +28,8 @@ class InventoryItemView(APIView):
         if not request.query_params.get('include_inactive', False):
             queryset = queryset.filter(is_active=True)
 
-        serializer = self.serializer_class(queryset, many=True)
-        return Response(serializer.data)
+        serializer = self.inventoryItemListSerializer(queryset, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     @swagger_auto_schema(
         operation_description="Create a new inventory item",
@@ -37,8 +38,10 @@ class InventoryItemView(APIView):
     )
     def post(self, request):
         """Create a new inventory item"""
-        serializer = self.serializer_class(data=request.data)
+        print("Request data:", request.data)
+        serializer = self.inventoryItemCreateUpdateSerializer(data=request.data)
         if serializer.is_valid():
             item = self.service.add_item(serializer.validated_data)
-            return Response(self.serializer_class(item).data, status=status.HTTP_201_CREATED)
+            return Response(self.inventoryItemCreateUpdateSerializer(item).data, status=status.HTTP_201_CREATED)
+        print("Validation errors:", serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST) 

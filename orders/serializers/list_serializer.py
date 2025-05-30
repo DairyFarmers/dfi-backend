@@ -12,9 +12,9 @@ class OrderItemListSerializer(OrderItemBaseSerializer):
         model = OrderItem
         fields = [
             'id', 'inventory_item_name', 'quantity',
-            'unit_price', 'total_price', 'is_active'
+            'unit_price', 'total_price'
         ]
-        read_only_fields = ['total_price', 'is_active']
+        read_only_fields = ['total_price']
 
 class OrderListSerializer(OrderBaseSerializer):
     """
@@ -27,6 +27,6 @@ class OrderListSerializer(OrderBaseSerializer):
         fields = [
             'id', 'order_number', 'customer_name',
             'order_date', 'status', 'total_amount',
-            'payment_status', 'items_count', 'is_active'
+            'payment_status', 'items_count', 'priority'
         ]
-        read_only_fields = ['order_date', 'is_active'] 
+        read_only_fields = ['order_date'] 
