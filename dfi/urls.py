@@ -26,9 +26,10 @@ urlpatterns = [
     path('api/v1/users/', include('users.urls')),
     path('api/v1/dashboard/', include('dashboard.urls')),
     path('api/v1/inventory/', include('inventories.urls')),
-    path('api/v1/orders/', include('orders.urls')),
+    path('api/v1/', include('orders.urls')),
     path('api/v1/chats/', include('chats.urls')),
     path('api/v1/suppliers/', include('suppliers.urls')),
+    path('api/v1/', include('sales.urls')),
 ]
 
 if settings.DEBUG:
