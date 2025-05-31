@@ -74,6 +74,7 @@ INSTALLED_APPS = [
     'inventories',
     'suppliers',
     'orders',
+    'sales',
     'dashboard',
     'reports',
     'chats',
@@ -126,6 +127,7 @@ DATABASES = {
         "PORT": env('DB_PORT'),
     }
 }
+
 
 # WebSocket Configuration
 
