@@ -5,6 +5,9 @@
 test2
 staticfiles
 tests
+*.pdf
+*.csv
+*.excel
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
