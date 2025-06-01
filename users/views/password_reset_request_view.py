@@ -4,7 +4,7 @@ from rest_framework import status
 from users.serializers.password_reset_request_serializer import (
     PasswordResetRequestSerializer
 )
-from utilities.email_sender import EmailSender
+from utils.email_sender import EmailSender
 from users.repositories.user_repository import UserRepository
 from users.models import User
 from users.services.email_service import EmailService

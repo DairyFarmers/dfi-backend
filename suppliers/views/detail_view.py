@@ -27,15 +27,19 @@ class SupplierDetailView(APIView):
             supplier = self.get_object(pk)
             if not supplier:
                 return Response(
-                    {"error": "Supplier not found"},
+                    {"message": "Supplier not found"},
                     status=status.HTTP_404_NOT_FOUND
                 )
             serializer = self.serializer_class(supplier)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response({
+                'status': True,
+                'message': 'Supplier fetched successfully',
+                'data': serializer.data
+            }, status=status.HTTP_200_OK)
         except Exception as e:
             logger.error(f"Error retrieving supplier {pk}: {e}")
             return Response(
-                {"error": "Failed to retrieve supplier"},
+                {"message": "Failed to retrieve supplier"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -55,7 +59,7 @@ class SupplierDetailView(APIView):
             supplier = self.get_object(pk)
             if not supplier:
                 return Response(
-                    {"error": "Supplier not found"},
+                    {"message": "Supplier not found"},
                     status=status.HTTP_404_NOT_FOUND
                 )
             
@@ -64,17 +68,19 @@ class SupplierDetailView(APIView):
                 updated_supplier = self.service.update_supplier(
                     pk, serializer.validated_data
                 )
-                return Response(self.serializer_class(updated_supplier).data)
-            return Response(
-                serializer.errors, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
+                return Response({
+                    'status': True,
+                    'message': 'Supplier updated successfully',
+                    'data': self.serializer_class(updated_supplier).data
+                })
+            return Response({
+                'message': serializer.errors
+            }, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             logger.error(f"Error updating supplier {pk}: {e}")
-            return Response(
-                {"error": "Failed to update supplier"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return Response({
+                'message': 'Failed to update supplier'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @swagger_auto_schema(
         operation_description="Delete a supplier",
@@ -90,17 +96,19 @@ class SupplierDetailView(APIView):
             supplier = self.get_object(pk)
             if not supplier:
                 return Response(
-                    {"error": "Supplier not found"},
+                    {"message": "Supplier not found"},
                     status=status.HTTP_404_NOT_FOUND
                 )
             supplier.soft_delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response({
+                'status': True,
+                'message': 'Supplier deleted successfully'
+            }, status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             logger.error(f"Error deleting supplier {pk}: {e}")
-            return Response(
-                {"error": "Failed to delete supplier"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return Response({
+                'message': 'Failed to delete supplier'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @swagger_auto_schema(
         operation_description="Restore a soft-deleted supplier",
@@ -116,15 +124,18 @@ class SupplierDetailView(APIView):
             supplier = self.get_object(pk)
             if not supplier:
                 return Response(
-                    {"error": "Supplier not found"},
+                    {"message": "Supplier not found"},
                     status=status.HTTP_404_NOT_FOUND
                 )
             supplier.restore()
             serializer = self.serializer_class(supplier)
-            return Response(serializer.data) 
+            return Response({
+                'status': True,
+                'message': 'Supplier restored successfully',
+                'data': serializer.data
+            })
         except Exception as e:
             logger.error(f"Error restoring supplier {pk}: {e}")
-            return Response(
-                {"error": "Failed to restore supplier"},
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return Response({
+                'message': 'Failed to restore supplier'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

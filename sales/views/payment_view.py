@@ -10,6 +10,7 @@ from sales.serializers import (
     PaymentCreateSerializer,
     PaymentListSerializer
 )
+from django.core.paginator import Paginator
 from utils import setup_logger
 
 logger = setup_logger(__name__)
@@ -27,6 +28,47 @@ class PaymentViewSet(viewsets.ModelViewSet):
         elif self.action == 'list':
             return PaymentListSerializer
         return PaymentDetailSerializer
+    
+    def list(self, request, *args, **kwargs):
+        try:
+            queryset = self.filter_queryset(self.get_queryset())
+            fetch_all = request.query_params.get('all', '').lower() == 'true'
+            
+            if fetch_all:
+                serializer = self.get_serializer(queryset, many=True)
+                return Response({
+                    'status': True,
+                    'message': 'Payments fetched successfully',
+                    'data': {
+                        'results': serializer.data,
+                        'count': queryset.count(),
+                    }
+                })
+            
+            page = request.query_params.get('page', 1)
+            page_size = int(request.query_params.get('size', 10))
+            paginator = Paginator(queryset, page_size)
+            current_page = paginator.get_page(page)
+            serializer = self.get_serializer(
+                current_page.object_list, 
+                many=True
+            )
+            return Response({
+                'status': True,
+                'message': 'Payments fetched successfully',
+                'data': {
+                    'results': serializer.data,
+                    'count': paginator.count,
+                    'num_pages': paginator.num_pages,
+                    'next': current_page.number + 1 if current_page.has_next() else None,
+                    'previous': current_page.number - 1 if current_page.has_previous() else None
+                }
+            })
+        except Exception as e:
+            logger.error(f"Error listing payments: {str(e)}")
+            return Response({
+                'message': 'Failed to fetch payments'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -46,19 +88,20 @@ class PaymentViewSet(viewsets.ModelViewSet):
                 user=request.user
             )
             response_serializer = PaymentDetailSerializer(payment)
-            return Response(
-                response_serializer.data, 
-                status=status.HTTP_201_CREATED
-            )
+            return Response({
+                'status': True,
+                'message': 'Payment created successfully',
+                'data': response_serializer.data
+            }, status=status.HTTP_201_CREATED)
         except ValueError as e:
             logger.error(f"Error creating payment: {e}")
             return Response({
-                'error': 'Failed to create payment',
+                'message': 'Failed to create payment',
             }, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             logger.error(f"Unexpected error creating payment: {e}")
             return Response({
-                'error': 'An unexpected error occurred'
+                'message': 'An unexpected error occurred'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
     @action(detail=True, methods=['post'])
@@ -68,16 +111,20 @@ class PaymentViewSet(viewsets.ModelViewSet):
             logger.info(f"{request.user} is voiding payment with ID {pk}")
             payment = self.payment_service.void_payment(pk, request.user)
             serializer = PaymentDetailSerializer(payment)
-            return Response(serializer.data)
+            return Response({
+                'status': True,
+                'message': 'Payment voided successfully',
+                'data': serializer.data
+            })
         except ValueError as e:
             logger.error(f"Error voiding payment: {e}")
             return Response({
-                'error': 'Failed to void payment',
+                'message': 'Failed to void payment',
             }, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             logger.error(f"Unexpected error voiding payment: {e}")
             return Response({
-                'error': 'An unexpected error occurred'
+                'message': 'An unexpected error occurred'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=False, methods=['get'])
@@ -90,18 +137,22 @@ class PaymentViewSet(viewsets.ModelViewSet):
             if not sale_id:
                 logger.error("sale_id is required for payment summary")
                 return Response({
-                    'error': 'sale_id is required'
+                    'message': 'sale_id is required'
                 }, status=status.HTTP_400_BAD_REQUEST)
 
             summary = self.payment_service.get_payment_summary(sale_id)
-            return Response(summary)
+            return Response({
+                'status': True,
+                'message': 'Payment summary fetched successfully',
+                'data': summary
+            })
         except ValueError as e:
             logger.error(f"Error retrieving payment summary: {e}")
             return Response({
-                'error': 'Failed to retrieve payment summary',
+                'message': 'Failed to retrieve payment summary',
             }, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             logger.error(f"Unexpected error retrieving payment summary: {e}")
             return Response({
-                'error': 'An unexpected error occurred'
+                'message': 'An unexpected error occurred'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

@@ -7,8 +7,7 @@ from users.services.email_service import EmailService
 from users.services.passcode_service import PasscodeService
 from users.repositories.passcode_repository import PasscodeRepository
 from users.models import Passcode
-from utilities.email_sender import EmailSender
-
+from utils.email_sender import EmailSender
 
 class PasscodeView(APIView):
     permission_classes = (IsAuthenticated,)

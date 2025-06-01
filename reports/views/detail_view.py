@@ -18,17 +18,21 @@ class ReportDetailView(APIView):
             logger.info(f"{request.user} is retrieving report {report_id}")
             report = Report.objects.get(id=report_id, generated_by=request.user)
             serializer = ReportSerializer(report)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response({
+                "status": True,
+                "message": "Report retrieved successfully",
+                "data": serializer.data
+            }, status=status.HTTP_200_OK)
         except Report.DoesNotExist:
             logger.error(f"Report {report_id} not found for user {request.user}")
             return Response(
-                {"error": "Report not found"},
+                {"message": "Report not found"},
                 status=status.HTTP_404_NOT_FOUND
             )
         except Exception as e:
             logger.error(f"Error retrieving report {report_id}: {e}")
             return Response(
-                {"error": "Failed to retrieve report"},
+                {"message": "Failed to retrieve report"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 

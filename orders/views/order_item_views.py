@@ -20,8 +20,13 @@ class OrderItemViewSet(viewsets.ModelViewSet):
     repository_class = OrderItemRepository
 
     def get_queryset(self):
-        return OrderItem.objects.filter(is_active=True)\
-            .select_related('order', 'inventory_item')
+        try:
+            logger.info(f"{self.request.user} is retrieving order items")
+            return OrderItem.objects.filter(is_active=True)\
+                .select_related('order', 'inventory_item')
+        except Exception as e:
+            logger.error(f"Error retrieving order items: {str(e)}")
+            return OrderItem.objects.none()
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -54,17 +59,21 @@ class OrderItemViewSet(viewsets.ModelViewSet):
             order_id = request.query_params.get('order_id')
             if not order_id:
                 return Response(
-                    {"detail": "Order ID is required"},
+                    {"message": "Order ID is required"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
             items = repository.get_items_by_order(order_id)
             serializer = OrderItemListSerializer(items, many=True)
-            return Response(serializer.data)
+            return Response({
+                'status': True,
+                'message': 'Order items fetched successfully',
+                'data': serializer.data
+            })
         except Exception as e:
             logger.error(f"Error retrieving order items: {str(e)}")
             return Response(
-                {"detail": "Failed to retrieve order items"},
+                {"message": "Failed to retrieve order items"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -77,7 +86,7 @@ class OrderItemViewSet(viewsets.ModelViewSet):
             inventory_item_id = request.query_params.get('inventory_item_id')
             if not inventory_item_id:
                 return Response(
-                    {"detail": "Inventory item ID is required"},
+                    {"message": "Inventory item ID is required"},
                     status=status.HTTP_400_BAD_REQUEST
                 )
             
@@ -85,13 +94,17 @@ class OrderItemViewSet(viewsets.ModelViewSet):
             stats = repository.calculate_item_statistics(inventory_item_id)
             
             return Response({
-                'statistics': stats,
-                'items': OrderItemListSerializer(items, many=True).data
+                'status': True,
+                'message': 'Order items fetched successfully',
+                'data': {
+                    'statistics': stats,
+                    'items': OrderItemListSerializer(items, many=True).data
+                }
             })
         except Exception as e:
             logger.error(f"Error retrieving order items by inventory item: {str(e)}")
             return Response(
-                {"detail": "Failed to retrieve order items by inventory item"},
+                {"message": "Failed to retrieve order items by inventory item"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -103,11 +116,15 @@ class OrderItemViewSet(viewsets.ModelViewSet):
             repository = self.repository_class()
             limit = int(request.query_params.get('limit', 10))
             items = repository.get_top_selling_items(limit)
-            return Response(items)
+            return Response({
+                'status': True,
+                'message': 'Top selling items fetched successfully',
+                'data': items
+            })
         except Exception as e:
             logger.error(f"Error retrieving top selling items: {str(e)}")
             return Response(
-                {"detail": "Failed to retrieve top selling items"},
+                {"message": "Failed to retrieve top selling items"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -119,11 +136,15 @@ class OrderItemViewSet(viewsets.ModelViewSet):
             repository = self.repository_class()
             limit = int(request.query_params.get('limit', 10))
             items = repository.get_most_discounted_items(limit)
-            return Response(items)
+            return Response({
+                'status': True,
+                'message': 'Most discounted items fetched successfully',
+                'data': items
+            })
         except Exception as e:
             logger.error(f"Error retrieving most discounted items: {str(e)}")
             return Response(
-                {"detail": "Failed to retrieve most discounted items"},
+                {"message": "Failed to retrieve most discounted items"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
 
@@ -135,10 +156,14 @@ class OrderItemViewSet(viewsets.ModelViewSet):
             repository = self.repository_class()
             items = repository.get_discounted_items()
             serializer = OrderItemListSerializer(items, many=True)
-            return Response(serializer.data)
+            return Response({
+                'status': True,
+                'message': 'Discounted items fetched successfully',
+                'data': serializer.data
+            })
         except Exception as e:
             logger.error(f"Error retrieving items with discounts: {str(e)}")
             return Response(
-                {"detail": "Failed to retrieve items with discounts"},
+                {"message": "Failed to retrieve items with discounts"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

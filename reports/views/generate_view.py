@@ -23,10 +23,9 @@ class ReportGenerateView(APIView):
             serializer = ReportGenerateSerializer(data=request.data)
             
             if not serializer.is_valid():
-                return Response(
-                    serializer.errors, 
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                return Response({
+                    'message': serializer.errors
+                }, status=status.HTTP_400_BAD_REQUEST)
 
             try:
                 report = ReportService.generate_report(
@@ -54,22 +53,19 @@ class ReportGenerateView(APIView):
                     return response
                 
                 # Default JSON response for report metadata
-                return Response(
-                    ReportSerializer(report).data, 
-                    status=status.HTTP_201_CREATED
-                )
+                return Response({
+                    'status': True,
+                    'message': 'Report generated successfully',
+                    'data': ReportSerializer(report).data
+                }, status=status.HTTP_201_CREATED)
+
             except Exception as e:
-                print("Error generating report:", str(e))
-                return Response(
-                    {
-                        "message": "Failed to generate report", 
-                        "error": str(e)
-                    }, 
-                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
-                )
+                logger.error(f"Error generating report: {str(e)}")
+                return Response({
+                    'message': 'Failed to generate report'
+                }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         except Exception as e:
             logger.error(f"Error generating report: {e}")
-            return Response(
-                {"error": "Failed to generate report"}, 
-                status=status.HTTP_500_INTERNAL_SERVER_ERROR
-            )
+            return Response({
+                'message': 'Failed to generate report'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
