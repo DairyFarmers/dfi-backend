@@ -8,6 +8,7 @@ from orders.models.order_item import OrderItem
 from users.models.user_activity_log import UserActivityLog
 from django.db import connection
 from ..serializers.activity_log_serializer import UserActivityLogSerializer
+from exceptions import RepositoryException
 
 class DashboardRepository:
     @staticmethod
@@ -29,11 +30,14 @@ class DashboardRepository:
 
     @staticmethod
     def get_recent_activities(user_id):
-        activities = UserActivityLog.objects.filter(
-            user_id=user_id
-        ).order_by('-timestamp')[:10]
-        serializer = UserActivityLogSerializer(activities, many=True)
-        return serializer.data
+        try:
+            activities = UserActivityLog.objects.filter(
+                user_id=user_id
+            ).order_by('-timestamp')[:10]
+            serializer = UserActivityLogSerializer(activities, many=True)
+            return serializer.data
+        except RepositoryException as e:
+            raise RepositoryException(f"Error fetching recent activities: {str(e)}")
 
     # Inventory Methods
     @staticmethod

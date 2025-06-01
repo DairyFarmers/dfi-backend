@@ -6,6 +6,9 @@ from drf_yasg.utils import swagger_auto_schema
 from reports.serializers import ReportSerializer, ReportGenerateSerializer
 from reports.services.report_service import ReportService
 from django.http import HttpResponse
+from utils import setup_logger
+
+logger = setup_logger(__name__)
 
 class ReportGenerateView(APIView):
     permission_classes = [IsAuthenticated]
@@ -15,50 +18,58 @@ class ReportGenerateView(APIView):
         responses={201: ReportSerializer()}
     )
     def post(self, request):
-        serializer = ReportGenerateSerializer(data=request.data)
-        
-        if not serializer.is_valid():
-            return Response(
-                serializer.errors, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
         try:
-            report = ReportService.generate_report(
-                user=request.user,
-                **serializer.validated_data
-            )
+            logger.info(f"{request.user} is generating a report")
+            serializer = ReportGenerateSerializer(data=request.data)
             
-            if serializer.validated_data['format'] == 'pdf':
-                response = HttpResponse(
-                    content=report.file, 
-                    content_type='application/pdf'
+            if not serializer.is_valid():
+                return Response(
+                    serializer.errors, 
+                    status=status.HTTP_400_BAD_REQUEST
                 )
-                response['Content-Disposition'] = f'attachment; filename="{report.file.name}"'
-                return response
-            elif serializer.validated_data['format'] in ['excel', 'csv']:
-                content_types = {
-                    'excel': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                    'csv': 'text/csv'
-                }
-                response = HttpResponse(
-                    content=report.file,
-                    content_type=content_types[serializer.validated_data['format']]
+
+            try:
+                report = ReportService.generate_report(
+                    user=request.user,
+                    **serializer.validated_data
                 )
-                response['Content-Disposition'] = f'attachment; filename="{report.file.name}"'
-                return response
-            
-            # Default JSON response for report metadata
-            return Response(
-                ReportSerializer(report).data, 
-                status=status.HTTP_201_CREATED
-            )
+                
+                if serializer.validated_data['format'] == 'pdf':
+                    response = HttpResponse(
+                        content=report.file, 
+                        content_type='application/pdf'
+                    )
+                    response['Content-Disposition'] = f'attachment; filename="{report.file.name}"'
+                    return response
+                elif serializer.validated_data['format'] in ['excel', 'csv']:
+                    content_types = {
+                        'excel': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                        'csv': 'text/csv'
+                    }
+                    response = HttpResponse(
+                        content=report.file,
+                        content_type=content_types[serializer.validated_data['format']]
+                    )
+                    response['Content-Disposition'] = f'attachment; filename="{report.file.name}"'
+                    return response
+                
+                # Default JSON response for report metadata
+                return Response(
+                    ReportSerializer(report).data, 
+                    status=status.HTTP_201_CREATED
+                )
+            except Exception as e:
+                print("Error generating report:", str(e))
+                return Response(
+                    {
+                        "message": "Failed to generate report", 
+                        "error": str(e)
+                    }, 
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR
+                )
         except Exception as e:
-            print("Error generating report:", str(e))
+            logger.error(f"Error generating report: {e}")
             return Response(
-                {
-                    "message": "Failed to generate report", 
-                    "error": str(e)
-                }, 
+                {"error": "Failed to generate report"}, 
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

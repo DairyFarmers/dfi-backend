@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .container { padding: 20px; }
+        .warning { color: #721c24; background-color: #f8d7da; padding: 10px; }
+        .info { margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="warning">
+            <h2>Product Expiring Soon</h2>
+            <p>This is to notify you that the following product is nearing its expiry date:</p>
+        </div>
+        <div class="info">
+            <p><strong>Product Name:</strong> {{ item_name }}</p>
+            <p><strong>Expiry Date:</strong> {{ expiry_date }}</p>
+            <p><strong>Quantity Remaining:</strong> {{ quantity }}</p>
+            <p><strong>Storage Condition:</strong> {{ storage_condition }}</p>
+        </div>
+        <p>Please take necessary action to prevent product waste.</p>
+    </div>
+</body>
+</html>

@@ -1,6 +1,5 @@
 # dashboard URL Configuration
 
-from django.contrib import admin
 from django.urls import path
 from dashboard.views.dashboard_summary_view import DashboardSummaryView
 

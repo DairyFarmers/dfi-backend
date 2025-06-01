@@ -15,35 +15,44 @@ class ReportService:
     @staticmethod
     def generate_report(user, report_type, date_from, date_to, format='pdf', filters=None):
         """Generate report based on type and parameters"""
-        report_generators = {
-            'sales': ReportService._generate_sales_report,
-            'inventory': ReportService._generate_inventory_report,
-            'orders': ReportService._generate_orders_report,
-            'user_activity': ReportService._generate_user_activity_report,
-        }
+        try:
+            report = Report.objects.create(
+                report_type=report_type,
+                format=format,
+                generated_by=user,
+                date_from=date_from,
+                date_to=date_to,
+                filters=filters or {},
+                status='pending'  # Set initial status
+            )
+
+            try:
+                report.status = 'processing'
+                report.save(update_fields=['status'])
+                report_generators = {
+                    'sales': ReportService._generate_sales_report,
+                    'inventory': ReportService._generate_inventory_report,
+                    'orders': ReportService._generate_orders_report,
+                    'user_activity': ReportService._generate_user_activity_report,
+                }
         
-        if report_type not in report_generators:
-            raise ValueError(f"Invalid report type: {report_type}")
+                if report_type not in report_generators:
+                    raise ValueError(f"Invalid report type: {report_type}")
 
-        # Generate report data
-        data = report_generators[report_type](date_from, date_to, filters)
-        
-        # Create report record
-        report = Report.objects.create(
-            report_type=report_type,
-            format=format,
-            generated_by=user,
-            date_from=date_from,
-            date_to=date_to,
-            filters=filters or {}
-        )
-
-        # Generate file based on format
-        file_content = ReportService._generate_file(data, format)
-        filename = f"{report_type}_report_{now().strftime('%Y%m%d_%H%M%S')}.{format}"
-        report.file.save(filename, ContentFile(file_content), save=True)
-
-        return report
+                data = report_generators[report_type](date_from, date_to, filters)
+                file_content = ReportService._generate_file(data, format)
+                filename = f"{report_type}_report_{now().strftime('%Y%m%d_%H%M%S')}.{format}"
+                report.file.save(filename, ContentFile(file_content), save=True)
+                report.status = 'completed'
+                report.save()
+                return report
+            except Exception as e:
+                report.status = 'failed'
+                report.error_message = str(e)
+                report.save(update_fields=['status', 'error_message'])
+                raise
+        except Exception as e:
+            raise ValueError(f"Failed to generate report: {str(e)}")
 
     @staticmethod
     def delete_report(report_id: str, user) -> bool:
@@ -138,14 +147,17 @@ class ReportService:
     @staticmethod
     def _generate_file(data, format):
         """Generate file in specified format"""
-        if format == 'pdf':
-            return ReportService._generate_pdf(data)
-        elif format == 'excel':
-            return ReportService._generate_excel(data)
-        elif format == 'csv':
-            return ReportService._generate_csv(data)
-        else:
-            raise ValueError(f"Unsupported format: {format}")
+        try:
+            if format == 'pdf':
+                return ReportService._generate_pdf(data)
+            elif format == 'excel':
+                return ReportService._generate_excel(data)
+            elif format == 'csv':
+                return ReportService._generate_csv(data)
+            else:
+                raise ValueError(f"Unsupported format: {format}")
+        except Exception as e:
+            raise ValueError(f"Failed to generate file: {str(e)}")
 
     @staticmethod
     def _generate_orders_report(date_from, date_to, filters=None):

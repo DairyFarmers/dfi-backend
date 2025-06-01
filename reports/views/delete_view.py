@@ -4,6 +4,9 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from drf_yasg.utils import swagger_auto_schema
 from reports.services.report_service import ReportService
+from utils import setup_logger
+
+logger = setup_logger(__name__)
 
 class ReportDeleteView(APIView):
     permission_classes = [IsAuthenticated]
@@ -18,19 +21,24 @@ class ReportDeleteView(APIView):
     )
     def delete(self, request, report_id):
         try:
+            logger.info(f"{request.user} is attempting to delete report {report_id}")
             ReportService.delete_report(report_id, request.user)
             return Response(status=status.HTTP_204_NO_CONTENT)
-            
         except ValueError as e:
+            logger.error(f"Error deleting report {report_id}: {e}")
             return Response(
-                {"message": str(e)}, 
+                {"error": str(e)},
                 status=status.HTTP_404_NOT_FOUND
             )
-        except Exception as e:
+        except PermissionError as e:
+            logger.error(f"Permission denied for user {request.user} on report {report_id}: {e}")
             return Response(
-                {
-                    "message": "Failed to delete report",
-                    "error": str(e)
-                },
+                {"error": "Permission denied"},
+                status=status.HTTP_403_FORBIDDEN
+            )
+        except Exception as e:
+            logger.error(f"Unexpected error deleting report {report_id}: {e}")
+            return Response(
+                {"error": "Failed to delete report"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

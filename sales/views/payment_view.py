@@ -10,6 +10,9 @@ from sales.serializers import (
     PaymentCreateSerializer,
     PaymentListSerializer
 )
+from utils import setup_logger
+
+logger = setup_logger(__name__)
 
 class PaymentViewSet(viewsets.ModelViewSet):
     queryset = Payment.objects.filter(is_active=True)
@@ -30,41 +33,75 @@ class PaymentViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         
         try:
-            # Create payment and update sale status
+            logger.info(f"{request.user} is creating a payment")
             payment = self.payment_service.create_payment(
                 sale_id=request.data.get('sale_id'),
                 payment_data={
                     **serializer.validated_data,
-                    'payment_date': serializer.validated_data.get('payment_date', timezone.now())
+                    'payment_date': serializer.validated_data.get(
+                        'payment_date', 
+                        timezone.now()
+                    )
                 },
                 user=request.user
             )
             response_serializer = PaymentDetailSerializer(payment)
-            return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+            return Response(
+                response_serializer.data, 
+                status=status.HTTP_201_CREATED
+            )
         except ValueError as e:
-            print(e)
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
+            logger.error(f"Error creating payment: {e}")
+            return Response({
+                'error': 'Failed to create payment',
+            }, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Unexpected error creating payment: {e}")
+            return Response({
+                'error': 'An unexpected error occurred'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
     @action(detail=True, methods=['post'])
     def void(self, request, pk=None):
         """Void a payment and update sale status"""
         try:
+            logger.info(f"{request.user} is voiding payment with ID {pk}")
             payment = self.payment_service.void_payment(pk, request.user)
             serializer = PaymentDetailSerializer(payment)
             return Response(serializer.data)
         except ValueError as e:
-            print(e)
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            logger.error(f"Error voiding payment: {e}")
+            return Response({
+                'error': 'Failed to void payment',
+            }, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Unexpected error voiding payment: {e}")
+            return Response({
+                'error': 'An unexpected error occurred'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     @action(detail=False, methods=['get'])
     def summary(self, request):
         """Get payment summary for a sale"""
-        sale_id = request.query_params.get('sale_id')
-        if not sale_id:
-            return Response(
-                {'error': 'sale_id is required'}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        try:
+            logger.info(f"{request.user} is retrieving payment summary")
+            sale_id = request.query_params.get('sale_id')
+            
+            if not sale_id:
+                logger.error("sale_id is required for payment summary")
+                return Response({
+                    'error': 'sale_id is required'
+                }, status=status.HTTP_400_BAD_REQUEST)
 
-        summary = self.payment_service.get_payment_summary(sale_id)
-        return Response(summary)
+            summary = self.payment_service.get_payment_summary(sale_id)
+            return Response(summary)
+        except ValueError as e:
+            logger.error(f"Error retrieving payment summary: {e}")
+            return Response({
+                'error': 'Failed to retrieve payment summary',
+            }, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            logger.error(f"Unexpected error retrieving payment summary: {e}")
+            return Response({
+                'error': 'An unexpected error occurred'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
