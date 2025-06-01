@@ -23,9 +23,15 @@ class SaleService:
     @transaction.atomic
     def create_sale(self, order_id, sale_data, user):
         """Create a new sale from an order"""
+        if not order_id:
+            raise ValueError("Order ID is required")
+        
+        if isinstance(order_id, str):
+                order_id = int(order_id)
+        
         order = self.order_repository.get_by_id(order_id)
         if not order:
-            raise ValueError("Order not found")
+            raise ValueError(f"Order not found with ID: {order_id}")
 
         if hasattr(order, 'sale'):
             raise ValueError("Sale already exists for this order")

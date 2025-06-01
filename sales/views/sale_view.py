@@ -31,7 +31,7 @@ class SaleViewSet(viewsets.ModelViewSet):
 
         try:
             sale = service.create_sale(
-                order_id=request.data.get('order_id'),
+                order_id=serializer.validated_data.get('order_id'),
                 sale_data={
                     **serializer.validated_data,
                     'sale_date': timezone.now()

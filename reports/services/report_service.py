@@ -10,6 +10,14 @@ import io
 from reports.utils.pdf_generator import PDFGenerator
 from reports.repositories.report_repository import ReportRepository
 from exceptions import DatabaseException
+from inventories.models import InventoryItem
+from django.db.models import Sum, Count
+from django.core.files.base import ContentFile
+import pandas as pd
+import io
+from reports.utils.pdf_generator import PDFGenerator
+from reports.repositories.report_repository import ReportRepository
+from exceptions import DatabaseException
 
 class ReportService:
     @staticmethod
@@ -160,6 +168,66 @@ class ReportService:
             raise ValueError(f"Failed to generate file: {str(e)}")
 
     @staticmethod
+    def _generate_orders_report(date_from, date_to, filters=None):
+        queryset = Order.objects.filter(
+            created_at__range=[date_from, date_to]
+        )
+
+        if filters:
+            queryset = queryset.filter(**filters)
+
+        data = {
+            'summary': {
+                'total_orders': queryset.count(),
+                'total_value': queryset.aggregate(total=Sum('total_amount'))['total'] or 0,
+                'pending_orders': queryset.filter(status='pending').count(),
+                'completed_orders': queryset.filter(status='completed').count()
+            },
+            'orders': list(queryset.values(
+                'id', 
+                'order_number',
+                'customer_email',  # Changed from customer__email
+                'customer_name',
+                'total_amount',
+                'status',
+                'created_at',
+                'expected_delivery_date',  # Changed from delivery_date
+                'payment_status'
+            ).order_by('-created_at'))
+        }
+        return data
+
+    @staticmethod
+    def _generate_pdf(data):
+        return PDFGenerator.generate_pdf(data)
+
+    @staticmethod
+    def _generate_excel(data):
+        output = io.BytesIO()
+        
+        # Create Excel writer
+        with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
+            # Write summary
+            pd.DataFrame([data['summary']]).to_excel(writer, sheet_name='Summary', index=False)
+            
+            # Write details
+            detail_key = next(k for k in data.keys() if k != 'summary')
+            pd.DataFrame(data[detail_key]).to_excel(writer, sheet_name='Details', index=False)
+
+        return output.getvalue()
+
+    @staticmethod
+    def _generate_csv(data):
+        output = io.StringIO()
+        
+        # Get the detail data (orders, items, or activities)
+        detail_key = next(k for k in data.keys() if k != 'summary')
+        
+        # Convert to DataFrame and save as CSV
+        df = pd.DataFrame(data[detail_key])
+        df.to_csv(output, index=False)
+        
+        return output.getvalue().encode('utf-8')
     def _generate_orders_report(date_from, date_to, filters=None):
         queryset = Order.objects.filter(
             created_at__range=[date_from, date_to]
