@@ -8,6 +8,7 @@ from inventories.models import InventoryItem
 from inventories.serializers import InventoryItemDetailSerializer
 from inventories.services.inventory_service import InventoryService
 from inventories.repositories.inventory_repository import InventoryRepository
+from django.core.paginator import Paginator
 from utils import setup_logger
 
 logger = setup_logger(__name__)
@@ -38,16 +39,31 @@ class InventoryItemTemperatureView(APIView):
         try:
             temperature = float(request.data.get('temperature'))
             item = self.service.update_item_temperature(pk, temperature)
+            
             if item and item.is_active:
                 serializer = self.serializer_class(item)
-                return Response(serializer.data)
+                paginator = Paginator(
+                    serializer.data,
+                    serializer.validated_data['size']
+                )
+                page_obj = paginator.get_page(serializer.validated_data['page'])
+                return Response({
+                    "status": True,
+                    "message": "Temperature updated successfully",
+                    "data": page_obj.object_list,
+                    "page": page_obj.number,
+                    "pages": paginator.num_pages,
+                    "total": paginator.count
+                }, status=status.HTTP_200_OK)
             return Response(
-                {"error": "Item not found or inactive"},
+                {"message": "Item not found or inactive"},
                 status=status.HTTP_404_NOT_FOUND
             )
         except (TypeError, ValueError):
-            logger.error(f"Invalid temperature value: {request.data.get('temperature')}")
+            logger.error(
+                f"Invalid temperature value: {request.data.get('temperature')}"
+            )
             return Response(
-                {"error": "Invalid temperature value"},
+                {"message": "Invalid temperature value"},
                 status=status.HTTP_400_BAD_REQUEST
             ) 

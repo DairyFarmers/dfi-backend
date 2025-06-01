@@ -12,6 +12,7 @@ from inventories.serializers import (
 from inventories.services.inventory_service import InventoryService
 from inventories.repositories.inventory_repository import InventoryRepository
 from inventories.views.filters.inventory_item_filter import InventoryItemFilter
+from django.core.paginator import Paginator
 from utils import setup_logger
 
 logger = setup_logger(__name__)
@@ -29,16 +30,52 @@ class InventoryItemView(APIView):
             queryset = self.service.get_all_items()
             item_filter = InventoryItemFilter(request)
             queryset = item_filter.apply_filters(queryset)
-
-            # Handle inactive items
+            
             if not request.query_params.get('include_inactive', False):
                 queryset = queryset.filter(is_active=True)
 
-            serializer = self.inventoryItemListSerializer(queryset, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            fetch_all = request.query_params.get('all', '').lower() == 'true'
+            
+            if fetch_all:
+                serializer = self.inventoryItemListSerializer(queryset, many=True)
+                return Response({
+                    "status": True,
+                    "message": "Inventory items fetched successfully",
+                    "data": {
+                        'results': serializer.data,
+                        'count': queryset.count(),
+                    }
+                }, status=status.HTTP_200_OK)
+            
+            page = int(request.query_params.get('page', 1))
+            size = int(request.query_params.get('size', 10))
+            paginator = Paginator(
+                queryset, 
+                size if size > 0 else 10
+            )
+            current_page = paginator.get_page(page)
+            serializer = self.inventoryItemListSerializer(
+                current_page.object_list, 
+                many=True
+            )
+            
+            return Response({
+                "status": True,
+                "message": "Inventory items fetched successfully",
+                "data": {
+                    'results': serializer.data,
+                    'count': paginator.count,
+                    'num_pages': paginator.num_pages,
+                    'next': page + 1 if current_page.has_next() else None,
+                    'previous': page - 1 if current_page.has_previous() else None
+                }
+            }, status=status.HTTP_200_OK)
         except Exception as e:
             logger.error(f"Error fetching inventory items: {e}")
-            return Response({"error": "Failed to fetch inventory items"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"message": "Failed to fetch inventory items"}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
     @swagger_auto_schema(
         operation_description="Create a new inventory item",
@@ -49,12 +86,19 @@ class InventoryItemView(APIView):
         """Create a new inventory item"""
         try:
             print("Request data:", request.data)
-            serializer = self.inventoryItemCreateUpdateSerializer(data=request.data)
+            serializer = self.inventoryItemCreateUpdateSerializer(
+                data=request.data
+            )
             if serializer.is_valid():
                 item = self.service.add_item(serializer.validated_data)
-                return Response(self.inventoryItemCreateUpdateSerializer(item).data, status=status.HTTP_201_CREATED)
-            print("Validation errors:", serializer.errors)
+                return Response({
+                    "status": True,
+                    "message": "Inventory item created successfully",
+                    "data": self.inventoryItemCreateUpdateSerializer(item).data
+                }, status=status.HTTP_201_CREATED)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             logger.error(f"Error creating inventory item: {e}")
-            return Response({"error": "Failed to create inventory item"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR) 
+            return Response({
+                "message": "Failed to create inventory item"
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR) 

@@ -27,18 +27,18 @@ class ReportDeleteView(APIView):
         except ValueError as e:
             logger.error(f"Error deleting report {report_id}: {e}")
             return Response(
-                {"error": str(e)},
+                {"message": "Report not found or invalid ID"},
                 status=status.HTTP_404_NOT_FOUND
             )
         except PermissionError as e:
             logger.error(f"Permission denied for user {request.user} on report {report_id}: {e}")
             return Response(
-                {"error": "Permission denied"},
+                {"message": "You do not have permission to delete this report"},
                 status=status.HTTP_403_FORBIDDEN
             )
         except Exception as e:
             logger.error(f"Unexpected error deleting report {report_id}: {e}")
             return Response(
-                {"error": "Failed to delete report"},
+                {"message": "Failed to delete report"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )

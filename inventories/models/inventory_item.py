@@ -80,6 +80,24 @@ class InventoryItem(BaseModel):
             models.Index(fields=['dairy_type']),
         ]
 
+    @property
+    def current_stock(self):
+        return self.quantity
+    
+    @current_stock.setter 
+    def current_stock(self, value):
+        self.quantity = value
+
+    def update_stock(self, amount: float, action: str = 'add'):
+        if action == 'add':
+            self.quantity += amount
+        elif action == 'subtract':
+            if self.quantity >= amount:
+                self.quantity -= amount
+            else:
+                raise ValueError(f"Insufficient stock. Available: {self.quantity}, Requested: {amount}")
+        self.save()
+
     def is_low_stock(self):
         return self.quantity <= self.reorder_point
 
