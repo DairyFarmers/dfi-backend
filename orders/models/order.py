@@ -1,13 +1,9 @@
 from django.db import models
 from django.core.validators import MinValueValidator
 from .base_model import BaseModel
-from inventories.models import InventoryItem
-from suppliers.models import Supplier
+import uuid
 
 class Order(BaseModel):
-    """
-    Model for managing dairy product orders.
-    """
     STATUS_CHOICES = [
         ('draft', 'Draft'),
         ('pending', 'Pending'),
@@ -35,6 +31,11 @@ class Order(BaseModel):
     ]
 
     # Order Details
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False
+    )
     order_number = models.CharField(max_length=100, unique=True)
     order_date = models.DateTimeField(auto_now_add=True)
     expected_delivery_date = models.DateField(null=True, blank=True)

@@ -10,10 +10,14 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 import environ
-import os
 from datetime import timedelta
+from celery.schedules import crontab
+import logging
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dfi.settings')
 
 env = environ.Env(
     APP_ENV=(str, 'dev'),
@@ -69,6 +73,8 @@ INSTALLED_APPS = [
     'django_filters',
     'rest_framework_simplejwt.token_blacklist',
     'drf_yasg',
+    'django_celery_results',
+    'django_celery_beat',
     'channels',
     'users',
     'inventories',
@@ -319,6 +325,22 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'simple',
         },
+        'celery': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/celery.log',
+            'formatter': 'verbose',
+            'maxBytes': 1024 * 1024 * 100,  # 100 MB
+            'backupCount': 5,
+        },
+        'redis': {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': 'logs/redis.log',
+            'formatter': 'verbose',
+            'maxBytes': 1024 * 1024 * 100,  # 100 MB
+            'backupCount': 5,
+        },
     },
     'root': {
         'handlers': ['console'],
@@ -330,5 +352,39 @@ LOGGING = {
             'level': os.getenv('DJANGO_LOG_LEVEL', 'INFO'),
             'propagate': False,
         },
+        'celery': {
+            'handlers': ['celery', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'redis': {
+            'handlers': ['redis', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
     },
+}
+
+
+# Redis Configuration
+REDIS_HOST = env('REDIS_HOST', default='localhost')
+REDIS_PORT = env('REDIS_PORT', default='6379')
+
+# Celery Configuration
+CELERY_BROKER_URL = f'redis://{REDIS_HOST}:{REDIS_PORT}/0'
+CELERY_RESULT_BACKEND = f'redis://{REDIS_HOST}:{REDIS_PORT}/0'
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+
+# Celery Beat Schedule
+CELERY_BEAT_SCHEDULE = {
+    'check-inventory-expiry': {
+        'task': 'notifications.tasks.check_inventory_expiry',
+        'schedule': crontab(minute='*/1'),
+    },
+    'process-notification-queue': {
+        'task': 'notifications.tasks.process_notification_queue',
+        'schedule': crontab(minute='*/1'),
+    }
 }

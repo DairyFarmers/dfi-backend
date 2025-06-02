@@ -2,6 +2,7 @@ from django.db import models
 from .base_model import BaseModel
 from orders.models import Order
 from django.db.models import Sum
+import uuid
 
 class Sale(BaseModel):
     PAYMENT_STATUS_CHOICES = [
@@ -11,7 +12,12 @@ class Sale(BaseModel):
         ('refunded', 'Refunded'),
         ('cancelled', 'Cancelled')
     ]
-
+    
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False
+    )
     order = models.OneToOneField(
         Order, 
         on_delete=models.PROTECT,

@@ -3,11 +3,14 @@ from django.core.validators import MinValueValidator
 from .base_model import BaseModel
 from .order import Order
 from inventories.models import InventoryItem
+import uuid
 
 class OrderItem(BaseModel):
-    """
-    Model for individual items within an order.
-    """
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False
+    )
     order = models.ForeignKey(
         Order,
         on_delete=models.CASCADE,

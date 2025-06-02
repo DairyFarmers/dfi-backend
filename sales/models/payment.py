@@ -2,6 +2,7 @@ from django.db import models
 from .base_model import BaseModel
 from .sale import Sale
 from django.db.models import Sum
+import uuid
 
 class Payment(BaseModel):
     PAYMENT_METHOD_CHOICES = [
@@ -11,6 +12,11 @@ class Payment(BaseModel):
         ('cheque', 'Cheque'),
     ]
 
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False
+    )
     sale = models.ForeignKey(
         Sale,
         on_delete=models.PROTECT,

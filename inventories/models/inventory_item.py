@@ -1,7 +1,7 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from .base_model import BaseModel
-from suppliers.models import Supplier
+import uuid
 
 class InventoryItem(BaseModel):
     DAIRY_TYPE_CHOICES = [
@@ -18,7 +18,12 @@ class InventoryItem(BaseModel):
         ('frozen', 'Frozen'),
         ('room_temp', 'Room Temperature'),
     ]
-
+    
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False
+        )
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True, null=True)
     dairy_type = models.CharField(max_length=20, choices=DAIRY_TYPE_CHOICES)
@@ -28,7 +33,10 @@ class InventoryItem(BaseModel):
     price = models.DecimalField(max_digits=10, decimal_places=2)
     expiry_date = models.DateField()
     manufacturing_date = models.DateField()
-    storage_condition = models.CharField(max_length=20, choices=STORAGE_CONDITION_CHOICES)
+    storage_condition = models.CharField(
+        max_length=20, 
+        choices=STORAGE_CONDITION_CHOICES
+    )
     is_active = models.BooleanField(default=True)
     
     # Temperature monitoring

@@ -14,3 +14,7 @@ daphne
 pandas>=2.0.0
 xlsxwriter>=3.1.0
 reportlab
+celery>=5.3.1
+redis>=4.5.4
+django-celery-results>=2.5.1
+django-celery-beat>=2.5.0
