@@ -2,69 +2,54 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from notifications.models import Notification
+from notifications.services.notification_service import NotificationService
 from notifications.serializers import NotificationSerializer
-from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+from django.core.paginator import Paginator
+from utils import setup_logger
+
+logger = setup_logger(__name__)
 
 class NotificationListView(APIView):
     permission_classes = [IsAuthenticated]
+    notification_service = NotificationService()
 
-    def get(self, request, *args, **kwargs):
-        notifications = Notification.objects.filter(
-            user=request.user
-        ).order_by('-created_at')
-
-        fetch_all = request.query_params.get('fetch_all', 'false').lower() == 'true'
-
-        if fetch_all:
+    def get(self, request):
+        """Get notifications for the current user"""
+        try:
+            fetch_all = request.query_params.get('all', 'false').lower() == 'true'
+            notifications = self.notification_service.get_user_notifications(
+                user_id=request.user.id,
+            )
             serializer = NotificationSerializer(notifications, many=True)
+
+            if fetch_all:
+                return Response({
+                    "status": True,
+                    "message": "All notifications fetched successfully",
+                    "data": {
+                        'results': serializer.data,
+                        'count': len(serializer.data),
+                    }
+                }, status=status.HTTP_200_OK)
+            
+            page = request.query_params.get('page', 1)
+            page_size = request.query_params.get('size', 10)
+            paginator = Paginator(serializer.data, page_size)
+            current_page = paginator.get_page(page)
             return Response({
                 "status": True,
-                "message": "All notifications fetched successfully",
+                "message": "Notifications fetched successfully",
                 "data": {
-                    "results": serializer.data,
-                    "count": notifications.count()
+                    'results': current_page.object_list,
+                    'count': paginator.count,
+                    'num_pages': paginator.num_pages,
+                    'next': page + 1 if current_page.has_next() else None,
+                    'previous': page - 1 if current_page.has_previous() else None
                 }
             }, status=status.HTTP_200_OK)
-
-        page = request.query_params.get('page', 1)
-        page_size = request.query_params.get('size', 10)
-        paginator = Paginator(notifications, page_size)
-        current_page = paginator.get_page(page)
-        serializer = NotificationSerializer(current_page, many=True)
-        
-        mock_data = [
-            {
-                "id": 1,
-                "title": "Welcome to the platform!",
-                "message": "Thank you for joining us. We hope you have a great experience.",
-                "read": False,
-                "created_at": "2023-10-01T12:00:00Z",
-                "type": "Welcome"
-            },
-            {
-                "id": 2,
-                "title": "New feature available",
-                "message": "Check out our new feature that allows you to customize your profile.",
-                "read": True,
-                "created_at": "2023-10-02T14:30:00Z",
-                "type": "Feature Update"
-            }
-        ]
-        return Response({
-            "status": True,
-            "message": "Notifications fetched successfully",
-            "data": {
-                "results": mock_data,
-                "count": 2
-            }
-        }, status=status.HTTP_200_OK)
-
-    def post(self, request):
-        notification_ids = request.data.get('notification_ids', [])
-        Notification.objects.filter(
-            id__in=notification_ids,
-            user=request.user
-        ).update(read=True)
-        
-        return Response(status=status.HTTP_200_OK)
+        except Exception as e:
+            logger.error(f"Unexpected error fetching notifications: {str(e)}")
+            return Response({
+                "status": False,
+                "message": "An unexpected error occurred"
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
