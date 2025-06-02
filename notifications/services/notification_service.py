@@ -5,10 +5,19 @@ from inventories.models import InventoryItem
 from django.db.models import Q
 from notifications.models import Notification
 from emails.services import EmailService
+from notifications.tasks import send_email_notification, send_push_notification
 
 class NotificationService:
     def __init__(self):
         self.email_service = EmailService()
+        
+    @staticmethod
+    def send_email(subject, message, recipients):
+        return send_email_notification.delay(subject, message, recipients)
+
+    @staticmethod
+    def send_push(user_id, message):
+        return send_push_notification.delay(user_id, message)
 
     @background(schedule=60*60*24)  # Run daily
     def check_expiry_dates():
