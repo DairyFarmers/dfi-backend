@@ -20,15 +20,21 @@ class NotificationListView(APIView):
             notifications = self.notification_service.get_user_notifications(
                 user_id=request.user.id,
             )
-            serializer = NotificationSerializer(notifications, many=True)
+            serializer = NotificationSerializer(notifications['notifications'], many=True)
 
             if fetch_all:
                 return Response({
                     "status": True,
                     "message": "All notifications fetched successfully",
                     "data": {
-                        'results': serializer.data,
-                        'count': len(serializer.data),
+                        "notifications": {
+                            'results': serializer.data,
+                            'count': len(serializer.data),
+                        },
+                        "stats": {
+                            'total_count': notifications['total_count'],
+                            'unread_count': notifications['unread_count']
+                        }
                     }
                 }, status=status.HTTP_200_OK)
             
@@ -40,11 +46,17 @@ class NotificationListView(APIView):
                 "status": True,
                 "message": "Notifications fetched successfully",
                 "data": {
-                    'results': current_page.object_list,
-                    'count': paginator.count,
-                    'num_pages': paginator.num_pages,
-                    'next': page + 1 if current_page.has_next() else None,
-                    'previous': page - 1 if current_page.has_previous() else None
+                        'notifications': {
+                            'results': current_page.object_list,
+                            'count': paginator.count,
+                            'num_pages': paginator.num_pages,
+                            'next': page + 1 if current_page.has_next() else None,
+                            'previous': page - 1 if current_page.has_previous() else None
+                        },
+                        "stats": {
+                            'total_count': notifications['total_count'],
+                            'unread_count': notifications['unread_count']
+                        }
                 }
             }, status=status.HTTP_200_OK)
         except Exception as e:

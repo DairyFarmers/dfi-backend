@@ -10,6 +10,6 @@ class InventoryItemListSerializer(InventoryItemBaseSerializer):
         fields = [
             'id', 'name', 'description', 'dairy_type',
             'quantity', 'unit', 'price', 'expiry_date',
-            'is_active', 'created_at', 'updated_at'
+            'is_active', 'created_at', 'updated_at', 'batch_number'
         ]
         read_only_fields = ['created_at', 'updated_at', 'is_active'] 

@@ -14,10 +14,12 @@ class NotificationService:
         self.email_service = EmailService()
         self.notification_repository = NotificationRepository()
 
-    def get_user_notifications(self, user_id: int):
+    def get_user_notifications(self, user_id):
         """Get all notifications for a user"""
         try:
-            notifications = self.notification_repository.get_notifications_by_user(user_id)
+            notifications = self.notification_repository.get_notifications_by_user(
+                user_id
+            )
             return {
                 "notifications": notifications,
                 "total_count": notifications.count(),
@@ -27,14 +29,15 @@ class NotificationService:
             logger.error(f"Failed to get notifications for user {user_id}: {str(e)}")
             raise RepositoryException("Failed to fetch notifications")
 
-    def mark_notifications_as_read(self, user_id: int, notification_id: int):
+    def mark_notifications_as_read(self, user_id, notification_id):
         """Mark specific notifications as read"""
         try:
             updated_count = self.notification_repository.mark_as_read(
                 user_id=user_id,
                 notification_id=notification_id
             )
-            logger.info(f"Marked {updated_count} notifications as read for user {user_id}")
+            logger.info(f"Marked {updated_count} \
+                notifications as read for user {user_id}")
             return {
                 "updated_count": updated_count,
                 "notification_ids": notification_id
@@ -43,7 +46,7 @@ class NotificationService:
             logger.error(f"Failed to mark notifications as read: {str(e)}")
             raise RepositoryException("Failed to mark notifications as read")
 
-    def mark_all_as_read(self, user_id: int):
+    def mark_all_as_read(self, user_id):
         """Mark all notifications as read for a user"""
         try:
             updated_count = self.notification_repository.mark_all_as_read(user_id)
@@ -54,9 +57,40 @@ class NotificationService:
         except Exception as e:
             logger.error(f"Failed to mark all notifications as read: {str(e)}")
             raise RepositoryException("Failed to mark all notifications as read")
+
+    def get_notification_by_id(self, notification_id):
+        """Get a notification by its ID"""
+        try:
+            notification = self.notification_repository \
+                .get_notification_by_id(notification_id)
+            if not notification:
+                raise RepositoryException("Notification not found")
+            return notification
+        except Exception as e:
+            logger.error(f"Failed to get notification by ID {notification_id}: {str(e)}")
+            raise RepositoryException("Failed to fetch notification by ID")
+    
+    def delete_notification(self, notification_id):
+        """Delete a notification by its ID"""
+        try:
+            success = self.notification_repository \
+                .delete_notification(notification_id)
+            if not success:
+                raise RepositoryException("Notification not found")
+            logger.info(f"Deleted notification with ID {notification_id}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to delete notification {notification_id}: {str(e)}")
+            raise RepositoryException("Failed to delete notification")
         
-    def create_notification(self, notification_type: str, title: str, 
-                          message: str, user_id: int, **kwargs):
+    def create_notification(
+        self, 
+        notification_type: str, 
+        title: str, 
+        message: str, 
+        user_id,
+        **kwargs
+        ):
         """Create a new notification"""
         try:
             notification = self.notification_repository.create_notification(
@@ -100,7 +134,11 @@ class NotificationService:
             logger.error(f"Failed to check expiry dates: {str(e)}")
             raise RepositoryException("Failed to check inventory expiry")
 
-    def _create_expiry_notification(self, item: InventoryItem, days: int):
+    def _create_expiry_notification(
+        self, 
+        item: InventoryItem, 
+        days: int
+        ):
         """Create notification for expiring product"""
         return self.create_notification(
             notification_type='expiry',

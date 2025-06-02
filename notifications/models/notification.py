@@ -1,6 +1,7 @@
 from django.db import models
 import uuid
 from django.urls import reverse
+from django.utils import timezone
 
 class Notification(models.Model):
     NOTIFICATION_TYPES = (
@@ -55,17 +56,16 @@ class Notification(models.Model):
             return None
 
         url_mapping = {
-            'inventory_item': f'/inventory/items/{self.related_object_id}',
-            'order': f'/orders/{self.related_object_id}',
-            'payment': f'/payments/{self.related_object_id}',
-            'price': f'/pricing/{self.related_object_id}',
+            'inventory_item': f'/inventory',
+            'order': f'/orders',
+            'payment': f'/sales',
+            'price': f'/sales',
         }
 
         return url_mapping.get(self.related_object_type)
 
     def mark_as_read(self):
         """Mark notification as read and save"""
-        from django.utils import timezone
         self.read = True
         self.read_at = timezone.now()
         self.save(update_fields=['read', 'read_at', 'updated_at'])

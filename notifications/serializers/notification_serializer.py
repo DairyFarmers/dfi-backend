@@ -48,6 +48,7 @@ class NotificationSerializer(serializers.ModelSerializer):
             'is_recent',
             'is_urgent'
         ]
+        ordering = ['-created_at', '-priority']
 
     def get_redirect_url(self, obj):
         """Get the redirect URL for the notification"""
