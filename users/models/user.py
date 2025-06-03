@@ -30,6 +30,21 @@ class User(AbstractBaseUser, PermissionsMixin):
     
     def __str__(self):
         return self.email
+    
+    
+    @property
+    def primary_location(self):
+        return self.locations.filter(is_primary=True).first()
+
+    @property
+    def contact_info(self):
+        return self.contact if hasattr(self, 'contact') else None
+
+    def get_locations_by_type(self, location_type):
+        return self.locations.filter(
+            location_type=location_type,
+            is_active=True
+        )
 
     @property
     def get_full_name(self):

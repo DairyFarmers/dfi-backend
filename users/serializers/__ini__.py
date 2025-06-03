@@ -3,5 +3,5 @@ from .b2buser_serializer import B2BUserSerializer
 
 __all__ = [
     'B2BUserRegistrationSerializer',
-    'B2BUserSerializer'
+    'B2BUserSerializer',
 ]
