@@ -18,6 +18,10 @@ from users.views.initialize_default_roles_view import InitializeDefaultRolesView
 from users.utils.permissions import get_user_permissions, get_all_permissions
 from users.views.b2b_registration_view import B2BRegistrationView
 from users.views.b2b_approval_view import B2BApprovalView
+from users.views.settings_view import UserSettingsView
+from users.views.user_contact_view import UserContactView
+from users.views.user_location_view import UserLocationView
+
 
 urlpatterns = [
     path('registration', RegistrationView.as_view(), name='registration'),
@@ -28,7 +32,7 @@ urlpatterns = [
     path('password-reset-request', PasswordResetRequestView.as_view(), name='password_reset_request'),
     path('password-reset', PasswordResetView.as_view(), name='password_reset'),
     path('list', UserListView.as_view(), name='user-list'),
-    path('detail/<str:user_id>', UserView.as_view(), name='user-detail'),
+    path('detail', UserView.as_view(), name='user-detail'),
     path("activity-logs", UserActivityLogsView.as_view(), name="user-activity-logs"),
     path('roles/', UserRoleView.as_view(), name='role-list'),
     path('roles/<uuid:role_id>/', UserRoleDetailView.as_view(), name='role-detail'),
@@ -37,4 +41,8 @@ urlpatterns = [
     path('permissions/all', get_all_permissions, name='all-permissions'),
     path('b2b/register/', B2BRegistrationView.as_view(), name='b2b-register'),
     path('b2b/<uuid:user_id>/approve/', B2BApprovalView.as_view(), name='b2b-approve'),
+    path('settings/', UserSettingsView.as_view(), name='user-settings'),
+    path('contact/', UserContactView.as_view(), name='user-contact'),
+    path('locations/', UserLocationView.as_view(), name='user-locations'),
+    path('locations/<uuid:location_id>', UserLocationView.as_view(), name='delete-location'),
 ]
