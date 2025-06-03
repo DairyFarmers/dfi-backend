@@ -4,6 +4,8 @@ from exceptions.exceptions import (
     InvalidCredentialsException, 
     InvalidDataException
 )
+from notifications.tasks import send_welcome_notification
+from django.utils import timezone
 
 class LoginService:        
     def login_user(self, request, email, password):
@@ -16,9 +18,14 @@ class LoginService:
         if not user:
             raise AuthenticationFailed("Invalid email or password")
         
+        if not user.last_login:
+            send_welcome_notification.delay(user.id)
+                
+        user.last_login = timezone.now()
+        user.save(update_fields=['last_login'])
+
         tokens = user.tokens()
         
-        # Serialize the role data
         role_data = {
             'id': str(user.role.id),
             'name': user.role.name,
