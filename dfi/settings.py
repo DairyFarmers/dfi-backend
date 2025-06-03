@@ -15,9 +15,6 @@ from pathlib import Path
 import environ
 from datetime import timedelta
 from celery.schedules import crontab
-import logging
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'dfi.settings')
 
 env = environ.Env(
     APP_ENV=(str, 'dev'),
@@ -386,5 +383,9 @@ CELERY_BEAT_SCHEDULE = {
     'process-notification-queue': {
         'task': 'notifications.tasks.process_notification_queue',
         'schedule': crontab(minute='*/1'),
+    },
+    'check-overdue-orders': {
+        'task': 'notifications.tasks.check_overdue_orders',
+        'schedule': crontab(hour=9, minute=0)
     }
 }

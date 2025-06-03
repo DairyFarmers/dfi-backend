@@ -1,5 +1,5 @@
 from django.core.management.base import BaseCommand
-from notifications.tasks import check_product_expiry
+from notifications.tasks.tasks import check_product_expiry
 from inventories.models import InventoryItem
 from django.utils import timezone
 from datetime import timedelta

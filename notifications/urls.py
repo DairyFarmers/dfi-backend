@@ -8,5 +8,5 @@ urlpatterns = [
     path('', NotificationListView.as_view(), name='notification-list'),
     path('<str:id>', NotificationMarkReadView.as_view(), name='notification-mark-read'),
     path('<str:id>/delete', NotificationDeleteView.as_view(), name='notification-delete'),
-    path('mark-all', NotificationMarkAllReadView.as_view(), name='notification-mark-all-read'),
+    path('mark-all/', NotificationMarkAllReadView.as_view(), name='notification-mark-all-read'),
 ]

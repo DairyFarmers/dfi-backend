@@ -15,7 +15,8 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-class EmailSender:        
+class EmailSender:
+    @staticmethod        
     def send_email(self, email, subject, plain_message, html_message):
         try:
             email = EmailMultiAlternatives(
@@ -27,4 +28,4 @@ class EmailSender:
             email.attach_alternative(html_message, "text/html")
             email.send()
         except Exception as e:
-            logger.error(f"Error sending password reset email: {e}")
+            logger.error(f"Error sending an email: {e}")

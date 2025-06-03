@@ -7,6 +7,11 @@ from exceptions.exceptions import (
     ServiceException
 )
 from orders.models import Order, OrderItem
+from notifications.tasks import (
+    send_order_notification,
+    send_order_status_notification,
+    send_order_cancellation_notification
+)
 from utils import setup_logger
 
 class OrderService:
@@ -44,6 +49,8 @@ class OrderService:
                 self.order_item_repository.create(item_data)
             
             order.calculate_total()
+            if order.status == 'confirmed':
+                send_order_notification.delay(order.id)
             return order
         except RepositoryException as e:
             self.logger.error(f'Error creating order: {str(e)}')
@@ -60,9 +67,12 @@ class OrderService:
             if not order.can_modify():
                 raise ServiceException('Order cannot be modified in its current state')
 
+            old_status = order.status
             order = self.order_repository.update(order, order_data)
 
-            # Update items if provided
+            if old_status != order.status:
+                send_order_status_notification.delay(str(order.id), old_status)
+            
             if items_data is not None:
                 # Delete existing items
                 order.items.all().delete()
@@ -104,6 +114,7 @@ class OrderService:
             
             order.status = 'cancelled'
             order.save()
+            send_order_cancellation_notification.delay(str(order.id))
             return order
         except RepositoryException as e:
             self.logger.error(f'Error cancelling order: {str(e)}')
@@ -150,7 +161,7 @@ class OrderService:
         """Get all overdue orders"""
         try:
             self.logger.debug("Retrieving overdue orders")
-            return self.order_repository.get_overdue_orders()
+            self.order_repository.get_overdue_orders()
         except RepositoryException as e:
             self.logger.error(f'Error retrieving overdue orders: {str(e)}')
             raise ServiceException(f'Error retrieving overdue orders: {str(e)}')
