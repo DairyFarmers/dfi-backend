@@ -2,24 +2,64 @@
 <html>
 <head>
     <style>
-        .container { padding: 20px; }
-        .warning { color: #721c24; background-color: #f8d7da; padding: 10px; }
-        .info { margin-top: 20px; }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background-color: #007bff;
+            color: #ffffff;
+            text-align: center;
+            padding: 10px 0;
+            border-radius: 8px 8px 0 0;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .content {
+            padding: 20px;
+        }
+        .content p {
+            text-align: left;
+            font-size: 14px;
+            color: #333333;
+        }
+        .footer {
+            text-align: center;
+            padding: 10px;
+            font-size: 12px;
+            color: #aaaaaa;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="warning">
-            <h2>Product Expiring Soon</h2>
-            <p>This is to notify you that the following product is nearing its expiry date:</p>
+        <div class="header">
+            <h1>Dairy Farmers: Product Expiring Soon! </h1>
         </div>
-        <div class="info">
-            <p><strong>Product Name:</strong> {{ item_name }}</p>
-            <p><strong>Expiry Date:</strong> {{ expiry_date }}</p>
-            <p><strong>Quantity Remaining:</strong> {{ quantity }}</p>
-            <p><strong>Storage Condition:</strong> {{ storage_condition }}</p>
+        <div class="content">
+            <p>Hello {{ recipient_name }},</p>
+            <p><strong>{{ title }}</strong></p>
+            <p>{{ message }}</p>
+            <p>To ensure the quality and safety of our products, we recommend that you use or dispose of this product before the expiry date.</p>
+            <p>If you have any questions or need further assistance, please do not hesitate to contact us.</p>
+            <p>Thank you for being a valued user of Dairy Farmers.</p>
         </div>
-        <p>Please take necessary action to prevent product waste.</p>
+        <div class="footer">
+            &copy; 2025 DairyFarmers. All rights reserved.
+        </div>
     </div>
 </body>
 </html>

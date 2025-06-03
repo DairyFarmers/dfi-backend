@@ -104,7 +104,7 @@ class NotificationRepository:
             raise RepositoryException("Failed to mark notification as read")
     
     @staticmethod
-    def mark_all_as_read(self, user_id: int) -> int:
+    def mark_all_as_read(user_id) -> int:
         """Mark all notifications as read for a user"""
         try:
             now = timezone.now()

@@ -38,8 +38,13 @@ class NotificationListView(APIView):
                     }
                 }, status=status.HTTP_200_OK)
             
-            page = request.query_params.get('page', 1)
-            page_size = request.query_params.get('size', 10)
+            try:
+                page = int(request.query_params.get('page', 1))
+                page_size = int(request.query_params.get('size', 10))
+            except ValueError:
+                page = 1
+                page_size = 10
+                
             paginator = Paginator(serializer.data, page_size)
             current_page = paginator.get_page(page)
             return Response({

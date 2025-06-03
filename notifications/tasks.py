@@ -1,14 +1,12 @@
 from celery import shared_task
 from django.utils import timezone
 from .models import Notification
-from django.core.mail import send_mail
-from django.conf import settings
 from datetime import timedelta
 from django.db.models import Q
 from inventories.models import InventoryItem
 from notifications.services import NotificationService
 from django.contrib.auth import get_user_model
-from users.models import UserRole
+from notifications.services import EmailService
 from utils import setup_logger
 
 logger = setup_logger(__name__)
@@ -91,18 +89,34 @@ def process_notification_queue():
 @shared_task
 def send_notification_email(notification_id):
     """Send email for a specific notification"""
-    notification = Notification.objects.get(id=notification_id)
-    
-    subject = f"DFI Notification: {notification.notification_title}"
-    message = notification.message
-    
-    send_mail(
-        subject=subject,
-        message=message,
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[notification.user.email],
-        fail_silently=False
-    )
-    
-    notification.sent_email = True
-    notification.save(update_fields=['sent_email', 'updated_at'])
+    try:
+        notification = Notification.objects.get(id=notification_id)
+        full_name = f"{notification.user.first_name} \
+            {notification.user.last_name}".strip()
+        service = EmailService()
+        email_sent = service.send_product_expiry_email(
+            notification.user.email, 
+            full_name,
+            notification.priority,
+            notification.notification_title,
+            notification.message,
+        )
+        
+        if email_sent:
+            logger.info(f"Email sent for notification \
+                {notification_id} to {notification.user.email}")
+            notification.sent_email = True
+            notification.save(update_fields=['sent_email', 'updated_at'])
+        else:
+            logger.error(f"Failed to send email for notification \
+                {notification_id}")
+        
+        logger.info(f"Email sent for notification \
+            {notification_id} to {notification.user.email}")
+        notification.sent_email = True
+        notification.save(update_fields=['sent_email', 'updated_at'])
+    except Exception as e:
+        logger.error(
+            f"Error in send_notification_email for \
+                {notification_id}: {str(e)}"
+            )

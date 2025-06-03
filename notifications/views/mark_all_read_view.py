@@ -11,20 +11,26 @@ class NotificationMarkAllReadView(APIView):
     permission_classes = [IsAuthenticated]
     notification_service = NotificationService()
 
-    def get(self, request):
+    def post(self, request):
         """Mark all notifications as read for the current user"""
         try:
             result = self.notification_service.mark_all_as_read(
                 user_id=request.user.id
             )
 
-            return Response({
-                "status": True,
-                "message": "All notifications marked as read successfully",
-                "data": {
-                    "updated_count": result["updated_count"]
-                }
-            }, status=status.HTTP_200_OK)
+            if result and 'updated_count' in result:
+                return Response({
+                    "status": True,
+                    "message": "All notifications marked as read successfully",
+                    "data": {
+                        "updated_count": result["updated_count"]
+                    }
+                }, status=status.HTTP_200_OK)
+            else:
+                return Response({
+                    "status": False,
+                    "message": "No notifications to mark as read"
+                }, status=status.HTTP_404_NOT_FOUND)
         except Exception as e:
             logger.error(f"Unexpected error marking all notifications as read: {str(e)}")
             return Response({
