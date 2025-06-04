@@ -8,9 +8,9 @@ from exceptions.exceptions import ServiceException
 from users.models import User
 from drf_yasg.utils import swagger_auto_schema
 from django.conf import settings
-import logging
+from utils import setup_logger
 
-logger = logging.getLogger(__name__)
+logger = setup_logger(__name__)
 
 class LoginView(APIView):
     serializer = LoginSerializer
@@ -26,6 +26,7 @@ class LoginView(APIView):
         serializer = self.serializer(data=request.data)
         
         if not serializer.is_valid():
+            logger.error(f"Login failed: {serializer.errors}")
             return Response({
                 "message": 'Invalid data. Please check your input'
             }, status=status.HTTP_400_BAD_REQUEST)
@@ -35,7 +36,8 @@ class LoginView(APIView):
                 request,
                 serializer.validated_data['email'],
                 serializer.validated_data['password']
-            ) 
+            )
+            logger.info(f"User {user_data['email']} logged in successfully.")
             response = Response({
                 'message': 'User authenticated successfully',
                 'status': True,
@@ -65,6 +67,8 @@ class LoginView(APIView):
             )
             return response
         except ServiceException as e:
+            logger.error(f"ServiceException during login: {str(e)}")
             return Response({
+                "status": False,
                 "message": "Invalid email or password. Please try again!"
             }, status=status.HTTP_400_BAD_REQUEST)
