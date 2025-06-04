@@ -11,7 +11,7 @@ class EmailService:
     def send_passcode_email(self, user, passcode):
         current_site = settings.TRUSTED_ORIGIN
         html_message = render_to_string('emails/passcode_email.html', {
-            'current_site': current_site,
+            'current_site': current_site[0],
             'recipient_name': user.first_name, 
             'otp': passcode
         })

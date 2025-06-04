@@ -10,21 +10,18 @@ from django.template.loader import render_to_string
 from django.utils.html import strip_tags
 from django.utils.encoding import smart_bytes
 from django.conf import settings
-import random
-import logging
+from utils import setup_logger
 
-logger = logging.getLogger(__name__)
+logger = setup_logger(__name__)
 
-class EmailSender:
-    @staticmethod        
+class EmailSender:      
     def send_email(self, email, subject, plain_message, html_message):
         try:
             email = EmailMultiAlternatives(
                 subject,
                 plain_message, 
                 settings.EMAIL_HOST_USER,
-                [email]
-            )
+                [email],            )
             email.attach_alternative(html_message, "text/html")
             email.send()
         except Exception as e:
