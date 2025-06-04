@@ -6,7 +6,6 @@ logger = logging.getLogger(__name__)
 
 class EmailVerificationSerializer(serializers.Serializer):
     passcode = serializers.CharField(max_length=8)
-    is_verified = serializers.BooleanField(required=False)
     
     class Meta:
         model = Passcode
@@ -14,6 +13,10 @@ class EmailVerificationSerializer(serializers.Serializer):
                   
     def validate(self, data):
         passcode = data.get('passcode') 
+        
         if not passcode:
-            raise serializers.ValidationError('Passcode is required!')
+            raise serializers.ValidationError(
+                'Passcode is required!'
+            )
+            
         return data

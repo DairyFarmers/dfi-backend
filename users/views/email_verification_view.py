@@ -16,9 +16,9 @@ from rest_framework import status
 from users.models import User, Passcode
 from django.utils import timezone
 from django.conf import settings
-import logging
+from utils import setup_logger
 
-logger = logging.getLogger(__name__)
+logger = setup_logger(__name__)
 
 class EmailVerificationView(APIView):
     permission_classes = (IsAuthenticated,)
@@ -31,36 +31,44 @@ class EmailVerificationView(APIView):
     @swagger_auto_schema(
         request_body=serializer,
         responses={200: 'Email is verified', 400: 'Invalid Data'}
-    )
-
-    
+    )    
     def post(self, request):
         serializer = self.serializer(data=request.data)
         
         if not serializer.is_valid():
+            logger.error(f'Invalid data for email verification: {serializer.errors}')
             return Response({
+                "status": False,
                 "message": 'Invalid data. Please check your input'
             }, status=status.HTTP_400_BAD_REQUEST)
             
         try:
-            email_verified = self.user_service.is_email_verified(
+            self.user_service.is_email_verified(
                 request.user.id
-            )
+            )    
             passcode = self.passcode_service.get_passcode(
                 serializer.validated_data['passcode']
             )
             passcode_validated = self.passcode_service.valid_passcode(
                 passcode,
             )
+            
+            if not passcode_validated:
+                logger.warning(f'Invalid passcode for user {request.user.email}')
+                return Response({
+                    'message': 'Invalid passcode',
+                    'status': False,
+                }, status=status.HTTP_400_BAD_REQUEST)
+                
             self.user_service.update_user(
                 request.user.id, 
-                is_verified=passcode_validated
+                is_verified=True
             )
             self.passcode_service.delete_passcode(
                 passcode.passcode
             )
             response = Response({
-                'message': 'User Email verified successfully!',
+                'message': 'User email verified successfully',
                 'status': True,
                 'data': {
                     'is_verified': True,
@@ -77,5 +85,7 @@ class EmailVerificationView(APIView):
             return response
         except ServiceException as e:
             return Response({
+                'status': False,
                 'message': 'Email verification failed',
+                'message_detail': str(e)
             }, status=status.HTTP_400_BAD_REQUEST)
