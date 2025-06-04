@@ -1,11 +1,13 @@
 from .exceptions import (
     DatabaseException,
     ServiceException,
-    RepositoryException
+    RepositoryException,
+    InvalidDataException
 )
 
 __all__ = [
     "DatabaseException",
     "ServiceException",
     "RepositoryException",
+    "InvalidDataException"
 ]
