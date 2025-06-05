@@ -33,6 +33,9 @@ class PasswordResetRequestView(APIView):
         serializer = self.serializer(data=request.data)
         
         if not serializer.is_valid():
+            logger.error(
+                f'Invalid data for password reset request: {serializer.errors}'
+            )
             return Response({
                 "message": 'Invalid data. Please check your input'
             }, status=status.HTTP_400_BAD_REQUEST)
@@ -43,12 +46,19 @@ class PasswordResetRequestView(APIView):
             )
             token = self.token_service.generate_token(user)
             self.email_service.send_password_reset_email(user, token)
+            logger.info(
+                f'Password reset email sent to {user.email}'
+            )
             return Response({
+                'status': True,
                 'message': 'Password reset requested',
-                'email': user.email,
             }, status=status.HTTP_200_OK)
         except ServiceException as e:
+            logger.error(
+                f'Error in password reset request: {str(e)}'
+            )
             return Response({
-                "message": str(e)
-            }, status=status.HTTP_400_BAD_REQUEST)
+                'status': True,
+                'message': 'Password reset requested'
+            }, status=status.HTTP_200_OK)
                     

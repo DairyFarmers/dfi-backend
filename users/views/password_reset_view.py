@@ -10,9 +10,9 @@ from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from exceptions.exceptions import ServiceException
 from django.core.exceptions import ValidationError
 from drf_yasg.utils import swagger_auto_schema
-import logging
+from utils import setup_logger
 
-logger = logging.getLogger(__name__)
+logger = setup_logger(__name__)
 
 class PasswordResetView(APIView):
     serializer = PasswordResetSerializer
@@ -29,7 +29,11 @@ class PasswordResetView(APIView):
         serializer = self.serializer(data=request.data)
         
         if not serializer.is_valid():
+            logger.error(
+                f'Invalid data for password reset: {serializer.errors}'
+            )
             return Response({
+                "status": False,
                 "message": 'Invalid data. Please check your input'
             }, status=status.HTTP_400_BAD_REQUEST)
             
@@ -41,16 +45,19 @@ class PasswordResetView(APIView):
                 user, 
                 serializer.validated_data['token']
             )
-            user.set_password(serializer.validated_data['password'])
+            user.set_password(
+                serializer.validated_data['password']
+            )
             user.save()
+            logger.info(
+                f'Password reset successful for user ID: {user.id}'
+            )
             return Response({
+                "status": True,
                 "message": "Password has been reset successfully"
             }, status=status.HTTP_200_OK)
-        except ValidationError as e:
-            return Response({
-                "message": 'Invalid user ID'
-            }, status=status.HTTP_400_BAD_REQUEST)
         except ServiceException as e:
             return Response({
-                "message": str(e)
+                "status": False,
+                "message": "Failed to reset password",
             }, status=status.HTTP_400_BAD_REQUEST)

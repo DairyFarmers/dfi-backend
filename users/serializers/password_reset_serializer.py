@@ -2,6 +2,7 @@ from rest_framework import serializers
 from django.utils.http import urlsafe_base64_decode
 from django.utils.encoding import force_str
 from django.core.exceptions import ValidationError
+from exceptions import InvalidDataException
 
 class PasswordResetSerializer(serializers.Serializer):
     password = serializers.CharField(max_length=100, min_length=8, write_only=True)

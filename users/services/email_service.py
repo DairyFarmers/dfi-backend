@@ -26,10 +26,10 @@ class EmailService:
     def send_password_reset_email(self, user, token):
         uidb64 = urlsafe_base64_encode(smart_bytes(user.id))        
         current_site = settings.TRUSTED_ORIGIN
-        relative_link = f'/password-reset/{uidb64}/{token}'
-        absolute_link=f"{current_site}{relative_link}"
+        relative_link = f'/reset-password/{uidb64}/{token}'
+        absolute_link=f"{current_site[0]}{relative_link}"
         html_message = render_to_string('emails/password_reset.html', {
-            'current_site': current_site,
+            'current_site': current_site[0],
             'recipient_name': user.first_name, 
             'link': absolute_link
         })
