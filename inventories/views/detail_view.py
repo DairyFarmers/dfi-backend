@@ -21,10 +21,19 @@ class InventoryItemDetailView(APIView):
     service = InventoryService(repository)
 
     def get_object(self, pk):
-        item = self.service.get_item_by_id(pk)
-        if not item:
+        try:
+            logger.info(f"Attempting to fetch item with ID: {pk}")
+            item = self.service.get_item_by_id(pk)
+            
+            if not item:
+                logger.warning(f"Item with ID {pk} not found")
+                return None
+                
+            logger.info(f"Successfully found item: {item.name} (ID: {pk})")
+            return item
+        except Exception as e:
+            logger.error(f"Error in get_object for ID {pk}: {str(e)}")
             return None
-        return item
 
     def get(self, request, pk):
         """Get a specific inventory item"""
@@ -32,7 +41,10 @@ class InventoryItemDetailView(APIView):
             item = self.get_object(pk)
 
             if not item:
-                return Response({"error": "Item not found"}, status=status.HTTP_404_NOT_FOUND)
+                return Response({
+                    "status": False,
+                    "message": "Item not found"
+                }, status=status.HTTP_404_NOT_FOUND)
     
             serializer = self.serializer_class(item)
             return Response({
@@ -43,6 +55,7 @@ class InventoryItemDetailView(APIView):
         except Exception as e:
             logger.error(f"Error fetching inventory item: {e}")
             return Response({
+                "status": False,
                 "message": "Failed to fetch inventory item"
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -97,18 +110,26 @@ class InventoryItemDetailView(APIView):
     def delete(self, request, pk):
         """Delete an inventory item"""
         try:
+            logger.info(f"Attempting to delete item with ID: {pk}")
             item = self.get_object(pk)
             
             if not item:
+                logger.warning(f"Item with ID {pk} not found for deletion")
                 return Response({
+                    "status": False,
                     "message": "Item not found"
                 }, status=status.HTTP_404_NOT_FOUND)
             
+            logger.info(f"Soft-deleting item: {item.name} (ID: {pk})")
             item.soft_delete()
-            return Response(status=status.HTTP_204_NO_CONTENT)
+            return Response({
+                "status": True,
+                "message": "Inventory item deleted successfully"    
+            }, status=status.HTTP_204_NO_CONTENT)
         except Exception as e:
             logger.error(f"Error deleting inventory item: {e}")
             return Response({
+                "status": False,
                 "message": "Failed to delete inventory item"
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
