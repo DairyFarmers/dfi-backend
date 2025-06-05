@@ -11,7 +11,8 @@ from orders.models import Order
 from orders.serializers import (
     OrderListSerializer,
     OrderDetailSerializer,
-    OrderCreateUpdateSerializer
+    OrderCreateUpdateSerializer,
+    OrderStatusUpdateSerializer
 )
 from orders.repositories import OrderRepository
 from .filters import OrderFilter
@@ -132,7 +133,7 @@ class OrderViewSet(viewsets.ModelViewSet):
                 {'message': 'Failed to create order'},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-        
+          
     def perform_update(self, serializer):
         try:
             logger.info(
@@ -145,6 +146,47 @@ class OrderViewSet(viewsets.ModelViewSet):
             logger.error(f"Error updating order {serializer.instance.id}: {str(e)}")
             raise e
 
+    @action(detail=True, methods=['patch'])
+    def update_status(self, request, pk=None):
+        """Update order status with validation."""
+        try:
+            order = self.get_object()
+            serializer = OrderStatusUpdateSerializer(
+                order,
+                data=request.data,
+                partial=True
+            )
+
+            if serializer.is_valid():
+                serializer.save()
+                logger.info(
+                    f"Order {pk} status updated to {request.data.get('status')} "
+                    f"by user {request.user}"
+                )
+                return Response({
+                    'status': True,
+                    'message': 'Order status updated successfully',
+                    'data': OrderDetailSerializer(order).data
+                })
+            
+            return Response({
+                'status': False,
+                'message': 'Invalid status update',
+            }, status=status.HTTP_400_BAD_REQUEST)
+
+        except Order.DoesNotExist:
+            logger.error(f"Order {pk} not found")
+            return Response({
+                'status': False,
+                'message': 'Order not found'
+            }, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            logger.error(f"Error updating order {pk} status: {str(e)}")
+            return Response({
+                'status': False,
+                'message': 'Failed to update order status'
+            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            
     @action(detail=True, methods=['post'])
     def cancel(self, request, pk=None):
         """Cancel an order"""

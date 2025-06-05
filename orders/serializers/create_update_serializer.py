@@ -65,7 +65,6 @@ class OrderCreateUpdateSerializer(OrderBaseSerializer):
         """
         items_data = validated_data.pop('items', None)
         
-        # Update order fields
         for attr, value in validated_data.items():
             setattr(instance, attr, value)
         

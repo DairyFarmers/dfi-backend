@@ -4,6 +4,7 @@ from .create_update_serializer import (
     OrderCreateUpdateSerializer,
     OrderItemCreateUpdateSerializer
 )
+from .status_update_serializer import OrderStatusUpdateSerializer
 
 __all__ = [
     'OrderListSerializer',
@@ -11,5 +12,6 @@ __all__ = [
     'OrderCreateUpdateSerializer',
     'OrderItemListSerializer',
     'OrderItemDetailSerializer',
-    'OrderItemCreateUpdateSerializer'
+    'OrderItemCreateUpdateSerializer',
+    'OrderStatusUpdateSerializer'
 ] 
