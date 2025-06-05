@@ -7,10 +7,8 @@ from inventories.views import (
     InventoryItemTemperatureView
 )
 
-app_name = 'inventories'
-
 urlpatterns = [
     path('items/', InventoryItemView.as_view(), name='inventory-items'),
-    path('items/<int:pk>', InventoryItemDetailView.as_view(), name='inventory-item-detail'),
-    path('items/<int:pk>/temperature/', InventoryItemTemperatureView.as_view(), name='inventory-item-temperature'),
+    path('items/<uuid:pk>', InventoryItemDetailView.as_view(), name='inventory-item-detail'),
+    path('items/<uuid:pk>/temperature/', InventoryItemTemperatureView.as_view(), name='inventory-item-temperature'),
 ]
