@@ -7,9 +7,9 @@ from users.serializers.user_activity_logs_serializer import UserActivityLogsSeri
 from rest_framework.pagination import PageNumberPagination
 
 class UserActivityLogPagination(PageNumberPagination):
-    page_size = 10  # Default page size
-    page_size_query_param = 'size'  # Allow clients to specify a custom page size
-    max_page_size = 100  # Maximum allowed page size
+    page_size = 10
+    page_size_query_param = 'size'
+    max_page_size = 100
 
 class UserActivityLogsView(APIView):
     pagination_class = UserActivityLogPagination
