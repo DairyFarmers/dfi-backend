@@ -4,6 +4,8 @@ from django.utils import timezone
 from exceptions import ServiceException, RepositoryException
 from utils import setup_logger
 
+logger = setup_logger(__name__)
+
 class DashboardService:
     def __init__(self, repository):
         self.repository = repository
@@ -259,21 +261,46 @@ class DashboardService:
     # Farmer Methods
     def get_farmer_active_crops(self, farmer_id):
         try:
-            return self.repository.get_farmer_active_crops(farmer_id)
+            return self.repository.get_farmer_active_crops(farmer_id) or {
+                'count': 0,
+                'crops': []
+            }
         except RepositoryException as e:
-            raise ServiceException(f"Error fetching farmer active crops: {str(e)}")
+            logger.error(f"Error getting farmer active crops: {str(e)}")
+            return {
+                'count': 0,
+                'crops': []
+            }
+
 
     def get_harvest_schedule(self, farmer_id):
         try:
-            return self.repository.get_harvest_schedule(farmer_id)
-        except RepositoryException as e:
-            raise ServiceException(f"Error fetching harvest schedule: {str(e)}")
+            return self.repository.get_harvest_schedule(farmer_id) or {
+                'upcoming': [],
+                'ongoing': []
+            }
+        except Exception as e:
+            logger.error(f"Error getting harvest schedule: {str(e)}")
+            return {
+                'upcoming': [],
+                'ongoing': []
+            }
 
     def get_crop_health_metrics(self, farmer_id):
+        """Get crop health metrics for a farmer"""
         try:
-            return self.repository.get_crop_health_metrics(farmer_id)
-        except RepositoryException as e:
-            raise ServiceException(f"Error fetching crop health metrics: {str(e)}")
+            return self.repository.get_crop_health_metrics(farmer_id) or {
+                'healthy': 0,
+                'at_risk': 0,
+                'needs_attention': 0
+            }
+        except Exception as e:
+            logger.error(f"Error getting crop health metrics: {str(e)}")
+            return {
+                'healthy': 0,
+                'at_risk': 0,
+                'needs_attention': 0
+            }
 
     def get_market_prices(self):
         try:
