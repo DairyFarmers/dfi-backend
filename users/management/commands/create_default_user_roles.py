@@ -65,6 +65,7 @@ class Command(BaseCommand):
                     'can_export_inventory_data': True,
                     
                     # Basic Access
+                    'can_view_analytics': True,
                     'can_access_api': True,
                     'can_view_users': True
                 }
@@ -90,6 +91,7 @@ class Command(BaseCommand):
                     'can_view_customers': True,
                     
                     # Basic Access
+                    'can_view_analytics': True,
                     'can_access_api': True,
                     'can_view_inventory': True
                 }
@@ -112,6 +114,7 @@ class Command(BaseCommand):
                     'can_view_profile': True,
                     
                     # Basic Access
+                    'can_view_analytics': True,
                     'can_access_api': True
                 }
             }

@@ -5,6 +5,10 @@ from users.models.user import User
 from inventories.models.inventory_item import InventoryItem
 from orders.models.order import Order
 from orders.models.order_item import OrderItem
+from products.models import (
+    DairyProduction,
+    DairyInventory
+)
 from users.models.user_activity_log import UserActivityLog
 from django.db import connection
 from ..serializers.activity_log_serializer import UserActivityLogSerializer
@@ -252,39 +256,47 @@ class DashboardRepository:
         )
 
     @staticmethod
-    def get_farmer_active_crops(farmer_id):
-        # TODO: Implement when Crop model is available
-        return []
+    def get_dairy_production_summary(farmer_id, time_range):
+        """Get dairy production summary for farmer"""
+        start_date = DashboardRepository.get_time_range_filter(time_range)
+        return DairyProduction.objects.filter(
+            farmer_id=farmer_id,
+            production_date__gte=start_date
+        ).values('product_type').annotate(
+            total_quantity=Sum('quantity'),
+            avg_quality=Avg('quality_score')
+        )
 
     @staticmethod
-    def get_harvest_schedule(farmer_id):
-        # TODO: Implement when Crop model is available
-        return []
+    def get_dairy_inventory_status(farmer_id):
+        """Get current dairy inventory status"""
+        return DairyInventory.objects.filter(
+            production__farmer_id=farmer_id,
+            quantity_available__gt=0
+        ).values(
+            'production__product_type'
+        ).annotate(
+            total_quantity=Sum('quantity_available'),
+            expiring_soon=Count(
+                'id',
+                filter=Q(
+                    expiry_date__lte=timezone.now() + timedelta(days=7)
+                )
+            )
+        )
 
     @staticmethod
-    def get_crop_health_metrics(farmer_id):
-        # TODO: Implement when CropHealth model is available
-        return []
-
-    @staticmethod
-    def get_market_prices():
-        # TODO: Implement when MarketPrice model is available
-        return []
-
-    @staticmethod
-    def get_demand_forecast():
-        # TODO: Implement when Demand model is available
-        return []
-
-    @staticmethod
-    def get_best_selling_crops():
-        thirty_days_ago = timezone.now() - timedelta(days=30)
-        return OrderItem.objects.filter(
-            order__updated_at__gte=thirty_days_ago,
-            product__category='crop'
-        ).values('product__name').annotate(
-            total_quantity=Sum('quantity')
-        ).order_by('-total_quantity')[:10]
+    def get_dairy_revenue_metrics(farmer_id, time_range):
+        """Get revenue metrics for dairy products"""
+        start_date = DashboardRepository.get_time_range_filter(time_range)
+        return Order.objects.filter(
+            farmer_id=farmer_id,
+            created_at__gte=start_date,
+            orderitem__product__category='dairy'
+        ).values('updated_at__date').annotate(
+            daily_revenue=Sum('total_amount'),
+            products_sold=Count('orderitem')
+        ).order_by('updated_at__date')
 
     @staticmethod
     def get_farmer_sales_history(farmer_id, time_range):
@@ -305,16 +317,6 @@ class DashboardRepository:
             total_orders=Count('id'),
             total_spent=Sum('total_amount')
         ).order_by('-total_spent')
-
-    @staticmethod
-    def get_farmer_revenue_trends(farmer_id, time_range):
-        start_date = DashboardRepository.get_time_range_filter(time_range)
-        return Order.objects.filter(
-            farmer_id=farmer_id,
-            updated_at__gte=start_date
-        ).values('updated_at__date').annotate(
-            revenue=Sum('total_amount')
-        ).order_by('updated_at__date')
 
     @staticmethod
     def get_payment_methods_distribution():
