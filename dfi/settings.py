@@ -83,6 +83,7 @@ INSTALLED_APPS = [
     'chats',
     'notifications',
     'emails',
+    'products',
 ]
 
 MIDDLEWARE = [
