@@ -23,6 +23,7 @@ from users.views.user_contact_view import UserContactView
 from users.views.user_location_view import UserLocationView
 from users.views.change_password_view import ChangePasswordView
 from users.views.logout_view import LogoutView
+from users.views.user_detail_view import UserDetailView
 
 urlpatterns = [
     path('registration', RegistrationView.as_view(), name='registration'),
@@ -48,4 +49,5 @@ urlpatterns = [
     path('locations/<uuid:location_id>', UserLocationView.as_view(), name='delete-location'),
     path('change-password', ChangePasswordView.as_view(), name='change-password'),
     path('logout', LogoutView.as_view(), name='logout'),
+    path('<uuid:user_id>/', UserDetailView.as_view(), name='user-detail-view'),
 ]
