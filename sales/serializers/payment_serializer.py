@@ -47,6 +47,13 @@ class PaymentCreateSerializer(serializers.ModelSerializer):
             'reference_number',
             'notes'
         ]
+        
+    def validate(self, data):
+        if not data.get('payment_method'):
+            raise serializers.ValidationError({
+                'payment_method': 'Payment method is required'
+            })
+        return data
 
     def validate(self, attrs):
         """
@@ -83,5 +90,5 @@ class PaymentListSerializer(serializers.ModelSerializer):
             'amount',
             'payment_date',
             'payment_method_display',
-            'reference_number'
+            'reference_number',
         ]
