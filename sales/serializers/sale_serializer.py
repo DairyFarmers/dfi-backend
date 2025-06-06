@@ -3,6 +3,7 @@ from sales.models import Sale
 from orders.serializers.detail_serializer import OrderDetailSerializer
 from users.serializers.user_serializer import UserSerializer
 from decimal import Decimal
+import uuid
 
 class SaleSerializer(serializers.ModelSerializer):
     order = OrderDetailSerializer(read_only=True)
@@ -14,7 +15,10 @@ class SaleSerializer(serializers.ModelSerializer):
         read_only_fields = ('invoice_number', 'sale_date', 'seller')
 
 class SaleCreateSerializer(serializers.ModelSerializer):
-    order_id = serializers.IntegerField(required=True)
+    order_id = serializers.UUIDField(
+        required=True,
+        help_text="UUID of the order associated with this sale"
+    )
     payment_status = serializers.ChoiceField(
         choices=['pending', 'partial', 'paid'],
         default='pending'

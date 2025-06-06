@@ -74,9 +74,18 @@ class PaymentService:
         if not sale:
             raise ValueError("Sale not found")
 
-        payments = self.payment_repository.get_sale_payments(sale_id)
-        total_paid = payments.aggregate(total=Sum('amount'))['total'] or 0
+        active_payments = self.payment_repository.get_sale_payments(sale_id)
+        total_paid = active_payments.aggregate(total=Sum('amount'))['total'] or 0
         remaining = sale.total_amount - total_paid
+        
+        if remaining <= 0:
+            payment_status = 'paid'
+        elif total_paid > 0:
+            payment_status = 'partial'
+        else:
+            payment_status = 'pending'
+            
+        all_payments = self.payment_repository.get_sale_payments(sale_id)
 
         return {
             'sale_id': sale_id,
@@ -84,9 +93,17 @@ class PaymentService:
             'total_amount': sale.total_amount,
             'total_paid': total_paid,
             'remaining_balance': remaining,
-            'payment_status': sale.payment_status,
-            'payment_count': payments.count(),
-            'last_payment_date': payments.order_by('-payment_date').values_first('payment_date')
+            'overall_status': payment_status,
+            'payment_count': active_payments.count(),
+            'payments': [{
+                'id': payment.id,
+                'amount': payment.amount,
+                'payment_date': payment.payment_date,
+                'payment_method': payment.payment_method,
+                'reference_number': payment.reference_number,
+                'is_active': payment.is_active,
+                'status': 'Active' if payment.is_active else 'Voided'
+            } for payment in all_payments.order_by('-payment_date')]
         }
 
     def _update_sale_payment_status(self, sale):

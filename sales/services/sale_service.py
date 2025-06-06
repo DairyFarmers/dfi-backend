@@ -5,6 +5,7 @@ from orders.repositories.order_repository import OrderRepository
 from inventories.repositories.inventory_repository import InventoryRepository
 from orders.models import Order
 from inventories.models import InventoryItem
+import uuid
 
 class SaleService:
     def __init__(self):
@@ -26,10 +27,8 @@ class SaleService:
         if not order_id:
             raise ValueError("Order ID is required")
         
-        if isinstance(order_id, str):
-                order_id = int(order_id)
-        
         order = self.order_repository.get_by_id(order_id)
+        
         if not order:
             raise ValueError(f"Order not found with ID: {order_id}")
 

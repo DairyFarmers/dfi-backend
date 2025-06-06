@@ -71,11 +71,18 @@ class PaymentViewSet(viewsets.ModelViewSet):
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        logger.info(f"{request.user} is creating a payment")
         
         try:
-            logger.info(f"{request.user} is creating a payment")
+            serializer = self.get_serializer(data=request.data)
+            if not serializer.is_valid():
+                logger.error(f"Validation error: {serializer.errors}")
+                return Response({
+                    'status': False,
+                    'message': 'Invalid payment data',
+                    'errors': serializer.errors
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
             payment = self.payment_service.create_payment(
                 sale_id=request.data.get('sale_id'),
                 payment_data={
@@ -96,11 +103,13 @@ class PaymentViewSet(viewsets.ModelViewSet):
         except ValueError as e:
             logger.error(f"Error creating payment: {e}")
             return Response({
+                'status': False,
                 'message': 'Failed to create payment',
             }, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
             logger.error(f"Unexpected error creating payment: {e}")
             return Response({
+                'status': False,
                 'message': 'An unexpected error occurred'
             }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         
@@ -133,6 +142,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
         try:
             logger.info(f"{request.user} is retrieving payment summary")
             sale_id = request.query_params.get('sale_id')
+            logger.info(f"Received sale_id: {sale_id}")
             
             if not sale_id:
                 logger.error("sale_id is required for payment summary")
@@ -145,7 +155,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
                 'status': True,
                 'message': 'Payment summary fetched successfully',
                 'data': summary
-            })
+            }, status=status.HTTP_200_OK)
         except ValueError as e:
             logger.error(f"Error retrieving payment summary: {e}")
             return Response({
