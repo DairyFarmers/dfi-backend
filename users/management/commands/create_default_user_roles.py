@@ -35,11 +35,11 @@ class Command(BaseCommand):
                     'can_view_suppliers': True,
                     'can_view_reports': True,
                     
-                    'can_manage_inventory': True,
-                    'can_manage_sales': True,
-                    'can_manage_orders': True,
-                    'can_manage_suppliers': True,
-                    'can_manage_reports': True,
+                    'can_manage_inventory': False,
+                    'can_manage_sales': False,
+                    'can_manage_orders': False,
+                    'can_manage_suppliers': False,
+                    'can_manage_reports': False,
                     'can_access_api': True
                 }
             },

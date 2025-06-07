@@ -29,6 +29,8 @@ urlpatterns = [
     path('api/v1/', include('sales.urls')),
     path('api/v1/reports/', include('reports.urls')),
     path('api/v1/notifications/', include('notifications.urls')),
+    path('api/v1/search/', include('search.urls')),
+
 ]
 
 if settings.DEBUG:
