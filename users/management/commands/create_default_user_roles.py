@@ -66,6 +66,11 @@ class Command(BaseCommand):
                     
                     # Basic Access
                     'can_view_analytics': True,
+                    'can_view_invetory': True,
+                    'can_view_orders': True,
+                    'can_view_sales': True,
+                    'can_view_suppliers': True,
+                    'can_view_reports': True,
                     'can_access_api': True,
                     'can_view_users': True
                 }
@@ -92,6 +97,10 @@ class Command(BaseCommand):
                     
                     # Basic Access
                     'can_view_analytics': True,
+                    'can_view_inventory': True,
+                    'can_view_suppliers': True,
+                    'can_view_orders': True,
+                    'can_view_sales': True,
                     'can_access_api': True,
                     'can_view_inventory': True
                 }

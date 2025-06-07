@@ -10,11 +10,29 @@ from products.models import (
     DairyInventory
 )
 from users.models.user_activity_log import UserActivityLog
+from notifications.models.notification import Notification
 from django.db import connection
 from ..serializers.activity_log_serializer import UserActivityLogSerializer
+from notifications.serializers.notification_serializer import NotificationSerializer
 from exceptions import RepositoryException
+from utils import setup_logger
+
+logger = setup_logger(__name__)
 
 class DashboardRepository:
+    @staticmethod
+    def get_user_notifications(user_id):
+        """Get notifications for a specific user"""
+        try:
+            notifications = Notification.objects.filter(
+                user_id=user_id
+            ).order_by('-created_at')
+            serializer = NotificationSerializer(notifications, many=True)
+            return serializer.data
+        except RepositoryException as e:
+            logger.error(f"Repository: Error fetching notifications: {str(e)}")
+            []
+    
     @staticmethod
     def get_time_range_filter(time_range):
         now = timezone.now()
@@ -26,12 +44,6 @@ class DashboardRepository:
             return now - timedelta(days=365)
         return now - timedelta(days=7)  # default to week
 
-    # Common Methods
-    @staticmethod
-    def get_user_notifications(user_id):
-        # TODO: Implement notifications when the model is available
-        return []
-
     @staticmethod
     def get_recent_activities(user_id):
         try:
@@ -41,7 +53,8 @@ class DashboardRepository:
             serializer = UserActivityLogSerializer(activities, many=True)
             return serializer.data
         except RepositoryException as e:
-            raise RepositoryException(f"Error fetching recent activities: {str(e)}")
+            logger.error(f"Repository: Error fetching recent activities: {str(e)}")
+            return []
 
     # Inventory Methods
     @staticmethod
@@ -71,6 +84,19 @@ class DashboardRepository:
             total_value=Sum(F('quantity') * F('price'))
         )
         return float(result.get('total_value') or 0)
+
+    @staticmethod
+    def get_expiring_stock():
+        try:
+            expiry_threshold = datetime.now() + timedelta(days=30)
+            items = InventoryItem.objects.filter(
+                expiry_date__lte=expiry_threshold,
+                quantity__gt=0
+            ).values('name', 'quantity', 'expiry_date')
+            return list(items)
+        except Exception as e:
+            logger.error(f"Repository: Error getting expiring stock: {str(e)}")
+            return []
 
     # Order Methods
     @staticmethod

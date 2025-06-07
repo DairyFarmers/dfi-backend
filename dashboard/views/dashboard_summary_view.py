@@ -23,8 +23,8 @@ class DashboardSummaryView(APIView):
             
             # Common data for all users
             common_data = {
+                'notifications': self.service.get_user_notifications(user.id),
                 "last_login": user.last_login,
-                "notifications": self.service.get_user_notifications(user.id),
                 "recent_activities": self.service.get_recent_activities(user.id)
             }
 
@@ -63,35 +63,36 @@ class DashboardSummaryView(APIView):
                         "low_stock_items": self.service.get_low_stock_items(),
                         "stock_value": self.service.get_total_stock_value(),
                         "expiring_stock": self.service.get_expiring_stock(),
-                        "stock_movements": self.service.get_stock_movements(time_range),
-                        "top_moving_items": self.service.get_top_moving_items()
+                        #"stock_movements": self.service.get_stock_movements(time_range),
+                        #"top_moving_items": self.service.get_top_moving_items()
                     },
                     "order_metrics": {
+                        "total_orders": self.service.get_total_orders(time_range),
                         "pending_orders": self.service.get_pending_orders(),
                         "order_status_distribution": self.service.get_order_status_distribution()
                     },
-                    "supplier_metrics": {
-                        "pending_purchase_orders": self.service.get_pending_purchase_orders(),
-                        "reorder_suggestions": self.service.get_reorder_suggestions(),
-                        "supplier_performance": self.service.get_supplier_performance()
-                    }
+                    #"supplier_metrics": {
+                    #    "pending_purchase_orders": self.service.get_pending_purchase_orders(),
+                    #    "reorder_suggestions": self.service.get_reorder_suggestions(),
+                    #    "supplier_performance": self.service.get_supplier_performance()
+                    #}
                 })
 
             # Sales Representative Dashboard
             elif role_name == 'sales_representative':
                 metrics.update({
-                    "sales_metrics": {
-                        "sales_overview": self.service.get_user_sales(user.id, time_range),
-                        "popular_products": self.service.get_user_popular_products(user.id),
-                        "revenue_summary": self.service.get_user_revenue_summary(user.id, time_range)
-                    },
+                    #"sales_metrics": {
+                    #    "sales_overview": self.service.get_user_sales(user.id, time_range),
+                    #    "popular_products": self.service.get_user_popular_products(user.id),
+                    #    "revenue_summary": self.service.get_user_revenue_summary(user.id, time_range)
+                    #},
                     "order_metrics": {
                         "pending_orders": self.service.get_pending_orders(),
-                        "order_status_distribution": self.service.get_order_status_distribution(shop_owner_id=user.id)
+                        "order_status_distribution": self.service.get_order_status_distribution()
                     },
-                    "inventory_overview": {
-                        "available_items": self.service.get_total_inventory_items(),
-                        "low_stock_alerts": self.service.get_low_stock_items()
+                    "inventory_metrics": {
+                        "total_items": self.service.get_total_inventory_items(),
+                        "low_stock_items": self.service.get_low_stock_items()
                     }
                 })
 
@@ -99,40 +100,40 @@ class DashboardSummaryView(APIView):
             elif role_name == 'farmer':
                 try:
                     metrics.update({
-                        "production_metrics": {
-                            "dairy": {
-                                "daily_production": self.service.get_dairy_production_summary(user.id, time_range),
-                                "inventory_status": self.service.get_dairy_inventory_status(user.id),
-                                "quality_metrics": self.service.get_dairy_quality_metrics(user.id, time_range)
-                            }
-                        },
-                        "inventory_metrics": {
-                            "current_stock": self.service.get_farmer_inventory(user.id),
-                            "storage_utilization": self.service.get_storage_utilization(user.id),
-                            "expiring_soon": self.service.get_expiring_products(user.id)
-                        },
-                        "market_metrics": {
-                            "market_prices": self.service.get_market_prices(),
-                            "demand_forecast": self.service.get_demand_forecast(),
-                            "best_selling_products": self.service.get_best_selling_products(user.id),
-                            "competitor_analysis": self.service.get_competitor_analysis()
-                        },
-                        "sales_metrics": {
-                            "sales_summary": self.service.get_farmer_sales_summary(user.id, time_range),
-                            "revenue_trends": self.service.get_farmer_revenue_trends(user.id, time_range),
-                            "buyer_insights": self.service.get_farmer_buyer_insights(user.id),
-                            "payment_statistics": self.service.get_payment_statistics(user.id, time_range)
-                        },
-                        "operational_metrics": {
-                            "equipment_status": self.service.get_equipment_status(user.id),
-                            "maintenance_schedule": self.service.get_maintenance_schedule(user.id),
-                            "resource_utilization": self.service.get_resource_utilization(user.id)
-                        },
-                        "financial_metrics": {
-                            "profit_loss": self.service.get_profit_loss_summary(user.id, time_range),
-                            "expenses": self.service.get_expense_breakdown(user.id, time_range),
-                            "outstanding_payments": self.service.get_outstanding_payments(user.id)
-                        }
+                        #"production_metrics": {
+                        #    "dairy": {
+                        #        "daily_production": self.service.get_dairy_production_summary(user.id, time_range),
+                        #        "inventory_status": self.service.get_dairy_inventory_status(user.id),
+                        #        "quality_metrics": self.service.get_dairy_quality_metrics(user.id, time_range)
+                        #    }
+                        #},
+                        #"inventory_metrics": {
+                        #    "current_stock": self.service.get_farmer_inventory(user.id),
+                        #    "storage_utilization": self.service.get_storage_utilization(user.id),
+                        #    "expiring_soon": self.service.get_expiring_products(user.id)
+                        #},
+                        #"market_metrics": {
+                        #    "market_prices": self.service.get_market_prices(),
+                        #    "demand_forecast": self.service.get_demand_forecast(),
+                        #    "best_selling_products": self.service.get_best_selling_products(user.id),
+                        #    "competitor_analysis": self.service.get_competitor_analysis()
+                        #},
+                        #"sales_metrics": {
+                        #    "sales_summary": self.service.get_farmer_sales_summary(user.id, time_range),
+                        #    "revenue_trends": self.service.get_farmer_revenue_trends(user.id, time_range),
+                        #    "buyer_insights": self.service.get_farmer_buyer_insights(user.id),
+                        #    "payment_statistics": self.service.get_payment_statistics(user.id, time_range)
+                        #},
+                        #"operational_metrics": {
+                        #    "equipment_status": self.service.get_equipment_status(user.id),
+                        #    "maintenance_schedule": self.service.get_maintenance_schedule(user.id),
+                        #    "resource_utilization": self.service.get_resource_utilization(user.id)
+                        #},
+                        #"financial_metrics": {
+                        #    "profit_loss": self.service.get_profit_loss_summary(user.id, time_range),
+                        #    "expenses": self.service.get_expense_breakdown(user.id, time_range),
+                        #    "outstanding_payments": self.service.get_outstanding_payments(user.id)
+                        #}
                     })
                 except Exception as e:
                     logger.error(f"Error getting farmer metrics: {str(e)}")

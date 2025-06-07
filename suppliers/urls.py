@@ -8,5 +8,5 @@ app_name = 'suppliers'
 
 urlpatterns = [
     path('', SupplierListView.as_view(), name='supplier-list'),
-    path('<int:pk>', SupplierDetailView.as_view(), name='supplier-detail'),
+    path('<uuid:pk>', SupplierDetailView.as_view(), name='supplier-detail'),
 ] 

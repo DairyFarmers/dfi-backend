@@ -1,6 +1,3 @@
-from datetime import datetime, timedelta
-from django.db.models import Sum, Count, Avg
-from django.utils import timezone
 from exceptions import ServiceException, RepositoryException
 from utils import setup_logger
 
@@ -18,7 +15,7 @@ class DashboardService:
             return self.repository.get_user_notifications(user_id)
         except RepositoryException as e:
             self.logger.error(f"Error fetching notifications for user {user_id}: {str(e)}")
-            raise ServiceException(f"Error fetching notifications: {str(e)}")
+            return []
 
     def get_recent_activities(self, user_id):
         try:
@@ -26,7 +23,7 @@ class DashboardService:
             return self.repository.get_recent_activities(user_id)
         except RepositoryException as e:
             self.logger.error(f"Error fetching recent activities for user {user_id}: {str(e)}")
-            raise ServiceException(f"Error fetching recent activities: {str(e)}")
+            return []
 
     # Admin Dashboard Methods
     def get_total_users(self):
@@ -157,9 +154,10 @@ class DashboardService:
     def get_expiring_stock(self):
         try:
             return self.repository.get_expiring_stock()
-        except RepositoryException as e:
-            raise ServiceException(f"Error fetching expiring stock: {str(e)}")
-
+        except Exception as e:
+            logger.error(f"Error getting expiring stock: {str(e)}")
+            return []
+        
     def get_total_stock_value(self):
         try:
             return self.repository.get_total_stock_value()
@@ -169,15 +167,17 @@ class DashboardService:
     def get_stock_movements(self, time_range):
         try:
             return self.repository.get_stock_movements(time_range)
-        except RepositoryException as e:
-            raise ServiceException(f"Error fetching stock movements: {str(e)}")
-
+        except Exception as e:
+            logger.error(f"Error getting stock movements: {str(e)}")
+            return []
+        
     def get_top_moving_items(self):
         try:
             return self.repository.get_top_moving_items()
-        except RepositoryException as e:
-            raise ServiceException(f"Error fetching top moving items: {str(e)}")
-
+        except Exception as e:
+            logger.error(f"Error getting top moving items: {str(e)}")
+            return []
+    
     # Stock Methods
     def get_stock_alerts(self):
         try:
@@ -188,21 +188,24 @@ class DashboardService:
     def get_pending_purchase_orders(self):
         try:
             return self.repository.get_pending_purchase_orders()
-        except RepositoryException as e:
-            raise ServiceException(f"Error fetching pending purchase orders: {str(e)}")
+        except Exception as e:
+            logger.error(f"Error getting pending purchase orders: {str(e)}")
+            return []
 
     def get_reorder_suggestions(self):
         try:
             return self.repository.get_reorder_suggestions()
-        except RepositoryException as e:
-            raise ServiceException(f"Error fetching reorder suggestions: {str(e)}")
+        except Exception as e:
+            logger.error(f"Error getting reorder suggestions: {str(e)}")
+            return []
 
     def get_supplier_performance(self):
         try:
             return self.repository.get_supplier_performance()
-        except RepositoryException as e:
-            raise ServiceException(f"Error fetching supplier performance: {str(e)}")
-
+        except Exception as e:
+            logger.error(f"Error getting supplier performance: {str(e)}")
+            return []
+    
     # Shop Owner Methods
     def get_shop_sales(self, shop_owner_id, time_range):
         try:
