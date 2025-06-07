@@ -2,7 +2,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from chats.models.chat import Message
-from chats.serializers.message_serializer import MessageSerializer
+from chats.serializers.chat_serializers import MessageSerializer
 from users.models.user import User
 
 class SendMessage(APIView):
