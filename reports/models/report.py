@@ -12,7 +12,6 @@ class Report(models.Model):
 
     FORMAT_TYPES = [
         ('pdf', 'PDF'),
-        ('excel', 'Excel'),
         ('csv', 'CSV'),
     ]
 
@@ -27,7 +26,7 @@ class Report(models.Model):
     report_type = models.CharField(max_length=20, choices=REPORT_TYPES)
     format = models.CharField(max_length=10, choices=FORMAT_TYPES)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    file = models.FileField(upload_to='reports/', null=True, blank=True)
+    file = models.FileField(upload_to='docs/', null=True, blank=True)
     generated_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True)
     generated_at = models.DateTimeField(auto_now_add=True)
     date_from = models.DateTimeField()

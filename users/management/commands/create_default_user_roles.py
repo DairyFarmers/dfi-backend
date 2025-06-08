@@ -34,6 +34,9 @@ class Command(BaseCommand):
                     'can_view_orders': True,
                     'can_view_suppliers': True,
                     'can_view_reports': True,
+                    'can_generate_reports': True,
+                    'can_download_reports': True,
+                    'can_generate_users_report': True,
                     
                     'can_manage_inventory': False,
                     'can_manage_sales': False,
@@ -61,12 +64,18 @@ class Command(BaseCommand):
                     'can_view_suppliers': True,
                     
                     # Reports
-                    'can_view_inventory_reports': True,
-                    'can_export_inventory_data': True,
+                    'can_generate_reports': True,
+                    'can_generate_inventory_report': True,
+                    'can_generate_orders_report': True,
+                    'can_generate_suppliers_report': True,
+                    'can_download_reports': True,
+                    'can_download_inventory_report': True,
+                    'can_download_orders_report': True,
+                    'can_download_suppliers_report': True,
                     
                     # Basic Access
                     'can_view_analytics': True,
-                    'can_view_invetory': True,
+                    'can_view_inventory': True,
                     'can_view_orders': True,
                     'can_view_sales': True,
                     'can_view_suppliers': True,
@@ -102,7 +111,15 @@ class Command(BaseCommand):
                     'can_view_orders': True,
                     'can_view_sales': True,
                     'can_access_api': True,
-                    'can_view_inventory': True
+                    'can_view_inventory': True,
+                    
+                    'can_view_reports': True,
+                    'can_generate_reports': True,
+                    'can_generate_sales_report': True,
+                    'can_generate_orders_report': True,
+                    'can_download_reports': True,
+                    'can_download_sales_report': True,
+                    'can_download_orders_report': True,  
                 }
             },
             {
